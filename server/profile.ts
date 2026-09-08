@@ -1,4 +1,5 @@
 import type { Profile } from '../src/domain';
+import {validatePreferences} from '../src/preferences';
 const terms=['Korean','English','Spanish','Chinese','Japanese','French','German','Portuguese','Arabic','한국어','영어','스페인어'];
 const skills=['annotation','evaluation','transcription','linguistic','localization','translation','teaching','tutor','assessment','QA','data analysis','Python','SQL','JavaScript','TypeScript','React','Java','AWS','Excel','Google Workspace','marketing','accounting','finance','sales','design','customer service','nursing','project management','HR','recruiting','교육','번역','전사','회계','영업','마케팅','디자인','간호','인사'];
 export function extractProfile(text:string):Profile {
@@ -14,5 +15,6 @@ export function validateProfile(value:unknown):Profile {
     if(!Array.isArray(v[k])||v[k].length>40||v[k].some((x:unknown)=>typeof x!=='string'||x.length>1500))throw new Error('프로필 항목 길이나 형식을 확인하세요.');
     out[k]=(v[k] as string[]).map(x=>x.trim()).filter(Boolean);
   }
+  out.preferences=validatePreferences(v.preferences);
   out.mode=v.mode==='ai'?'ai':'local';return out;
 }

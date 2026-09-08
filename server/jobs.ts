@@ -1,5 +1,6 @@
 import type { Compensation, Job, Profile, SearchResult, SourceResult } from '../src/domain';
 import type { Env } from './env';
+import {matchesPreferences} from '../src/preferences';
 export const sources=[
  {id:'welo',name:'Welo Global · Lever',company:'Welo Global',type:'lever',url:'https://api.lever.co/v0/postings/weloglobal?mode=json'},
  {id:'coupang',name:'Coupang · Greenhouse',company:'Coupang',type:'greenhouse',url:'https://boards-api.greenhouse.io/v1/boards/coupang/jobs?content=true'},
@@ -63,6 +64,7 @@ export async function search(profile:Profile,env:Env):Promise<SearchResult> {
    if(v.status==='rejected'){reports.push({source:sources[i].name,count:0,error:v.reason instanceof Error?v.reason.message:'수집 실패',cached:false,checkedAt:null});return;}
    let count=0;
    for(const job of v.value.jobs){
+    if(!matchesPreferences(job,profile.preferences))continue;
     const namedLanguages=['Korean','English','Spanish','Arabic','French','German','Portuguese','Japanese','Chinese','Farsi','Malayalam','Hindi','Italian','Dutch','Russian','Thai','Vietnamese','Turkish','Indonesian'];
     const required=namedLanguages.filter(l=>new RegExp(`\\b${l}\\b`,'i').test(job.title));
     if(required.length&&!required.some(l=>profile.languages.some(p=>p.toLowerCase().includes(l.toLowerCase()))))continue;
@@ -74,5 +76,5 @@ export async function search(profile:Profile,env:Env):Promise<SearchResult> {
    }
    reports.push({...v.value.report,count});
  });
- return {jobs:jobs.sort((a,b)=>Number(b.korea==='confirmed')-Number(a.korea==='confirmed')||b.match.length-a.match.length).slice(0,150),sources:reports,searchedAt:new Date().toISOString(),keywords};
+ return {jobs:jobs.sort((a,b)=>Number(b.korea==='confirmed')-Number(a.korea==='confirmed')||b.match.length-a.match.length).slice(0,150),sources:reports,searchedAt:new Date().toISOString(),keywords,preferences:profile.preferences};
 }

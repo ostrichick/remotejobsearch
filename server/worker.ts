@@ -53,7 +53,7 @@ export async function api(request:Request,env:Env):Promise<Response>{
   if(url.pathname==='/api/search'&&request.method==='POST'){
    const profile=await getData(env,'profiles',uid);if(!profile)return json({error:'먼저 프로필을 저장하세요.'},400);
    const previous=await getData(env,'searches',uid) as SearchResult|null;
-   if(previous&&Date.now()-Date.parse(previous.searchedAt)<60000&&JSON.stringify(previous.keywords)===JSON.stringify(profile.keywords))return json(previous);
+   if(previous&&Date.now()-Date.parse(previous.searchedAt)<60000&&JSON.stringify(previous.keywords)===JSON.stringify(profile.keywords)&&JSON.stringify(previous.preferences)===JSON.stringify(profile.preferences))return json(previous);
    await limit(env,uid,'search',50);
    const result=await search(profile,env);
    if(result.sources.every(s=>s.error))return json({error:'모든 출처 조회가 실패했습니다. 기존 결과는 유지됩니다.',sources:result.sources},502);
