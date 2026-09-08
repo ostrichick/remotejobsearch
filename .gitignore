@@ -1,0 +1,14 @@
+node_modules/
+dist/
+tmp/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+.env*
+!.env.example
+.dev.vars*
+.wrangler/
+artifacts/
+docs/INITIAL_SEARCH_PROFILE.md
+*.pdf
+*.docx
