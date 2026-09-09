@@ -16,5 +16,9 @@ export function validateProfile(value:unknown):Profile {
     out[k]=(v[k] as string[]).map(x=>x.trim()).filter(Boolean);
   }
   out.preferences=validatePreferences(v.preferences);
+  for(const k of ['primaryRoleKeywords','skillKeywords','languageKeywords','negativeKeywords'] as const){
+    if(v[k]!==undefined&&(!Array.isArray(v[k])||(v[k] as unknown[]).length>30||(v[k] as unknown[]).some(x=>typeof x!=='string'||String(x).length>150)))throw new Error('검색 키워드 분류를 확인하세요.');
+    (out as any)[k]=Array.isArray(v[k])?(v[k] as string[]).map(x=>x.trim()).filter(Boolean):[];
+  }
   out.mode=v.mode==='ai'?'ai':'local';return out;
 }

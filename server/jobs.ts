@@ -1,6 +1,7 @@
 import type { Compensation, Job, Profile, SearchResult, SourceResult } from '../src/domain';
 import type { Env } from './env';
 import {matchesPreferences} from '../src/preferences';
+import {scoreJob,SCORE_VERSION} from './relevance';
 export const sources=[
  {id:'welo',name:'Welo Global · Lever',company:'Welo Global',type:'lever',url:'https://api.lever.co/v0/postings/weloglobal?mode=json'},
  {id:'coupang',name:'Coupang · Greenhouse',company:'Coupang',type:'greenhouse',url:'https://boards-api.greenhouse.io/v1/boards/coupang/jobs?content=true'},
@@ -68,13 +69,15 @@ export async function search(profile:Profile,env:Env):Promise<SearchResult> {
     const namedLanguages=['Korean','English','Spanish','Arabic','French','German','Portuguese','Japanese','Chinese','Farsi','Malayalam','Hindi','Italian','Dutch','Russian','Thai','Vietnamese','Turkish','Indonesian'];
     const required=namedLanguages.filter(l=>new RegExp(`\\b${l}\\b`,'i').test(job.title));
     if(required.length&&!required.some(l=>profile.languages.some(p=>p.toLowerCase().includes(l.toLowerCase()))))continue;
+    const scored=scoreJob(profile,job);
     const text=(job.title+' '+job.description).toLowerCase();
+    if((profile.negativeKeywords??[]).some(k=>new RegExp(`(^|[^a-z0-9])${k.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}([^a-z0-9]|$)`,'i').test(text)))continue;
     const match=keywords.filter(k=>new RegExp(`(^|[^a-z0-9])${k.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}([^a-z0-9]|$)`,'i').test(text));
-    if(!match.length)continue;
+    if(!match.length||scored.matchScore<25)continue;
     count++;const canonical=new URL(job.url);canonical.search='';
-    if(!seen.has(canonical.href)){jobs.push({...job,match});seen.add(canonical.href);}
+    if(!seen.has(canonical.href)){jobs.push({...job,match:scored.matchedEvidence.length?scored.matchedEvidence:match,...scored});seen.add(canonical.href);}
    }
    reports.push({...v.value.report,count});
  });
- return {jobs:jobs.sort((a,b)=>Number(b.korea==='confirmed')-Number(a.korea==='confirmed')||b.match.length-a.match.length).slice(0,150),sources:reports,searchedAt:new Date().toISOString(),keywords,preferences:profile.preferences};
+ return {jobs:jobs.sort((a,b)=>(b.matchScore??0)-(a.matchScore??0)||(Date.parse(b.postedAt??'')||0)-(Date.parse(a.postedAt??'')||0)).slice(0,150),sources:reports,searchedAt:new Date().toISOString(),keywords,preferences:profile.preferences};
 }
