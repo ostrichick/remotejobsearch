@@ -6,7 +6,8 @@ export function extractProfile(text:string):Profile {
   const lines=text.split(/\n/).map(s=>s.trim()).filter(Boolean);
   const found=skills.filter(s=>new RegExp(`(^|[^a-z])${s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}([^a-z]|$)`,'i').test(text));
   const language=terms.filter(s=>text.toLowerCase().includes(s.toLowerCase()));
-  return {skills:found,languages:language,experience:lines.filter(s=>/\b(19|20)\d{2}\b/.test(s)&&!/@|linkedin|bachelor|degree|university|학사|대학교/i.test(s)).slice(0,20),education:lines.filter(s=>/bachelor|degree|university|학사|대학교|master|doctor/i.test(s)).slice(0,10),keywords:found.slice(0,12),mode:'local'};
+  const primaryRoleKeywords=found.filter(s=>/annotat|evaluat|transcri|linguist|localiz|translat|speech|voice|quality rater/i.test(s));
+  return {skills:found,languages:language,experience:lines.filter(s=>/\b(19|20)\d{2}\b/.test(s)&&!/@|linkedin|bachelor|degree|university|학사|대학교/i.test(s)).slice(0,20),education:lines.filter(s=>/bachelor|degree|university|학사|대학교|master|doctor/i.test(s)).slice(0,10),keywords:found.slice(0,12),primaryRoleKeywords,skillKeywords:found.filter(s=>!primaryRoleKeywords.includes(s)),languageKeywords:language,negativeKeywords:[],mode:'local'};
 }
 export function validateProfile(value:unknown):Profile {
   if(!value||typeof value!=='object')throw new Error('프로필 형식이 올바르지 않습니다.');
