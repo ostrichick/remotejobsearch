@@ -1,64 +1,297 @@
-import {useEffect,useState,useMemo} from 'react';
-import {defaultFilters,filterJobs,units,type Profile,type Job,type SearchResult,type Filters} from './domain';
-import {readResume} from './resume';
-import {emptyPreferences,parsePreferences,type Preferences} from './preferences';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  defaultFilters,
+  filterJobs,
+  type Filters,
+  type Job,
+  type Profile,
+  type SearchResult,
+} from './domain';
+import { readResume } from './resume';
+import { emptyPreferences, parsePreferences, type Preferences } from './preferences';
+import { api, fetchMe, type Trust } from './api';
+import Login from './components/Login';
+import ProfilePanel from './components/ProfilePanel';
+import PreferencesPanel from './components/PreferencesPanel';
+import ResultsPanel from './components/ResultsPanel';
+import JobDetailModal from './components/JobDetailModal';
 import './workspace.css';
-const empty:Profile={skills:[],languages:[],experience:[],education:[],keywords:[],mode:'local'};
-const date=(s:string|null)=>s?new Date(s).toLocaleString('ko-KR'):'미기재';
-const korea={confirmed:'한국 근무지/거주 명시',excluded:'한국 제외 조건',unknown:'한국 가능 여부 미확인'};
-async function api<T>(path:string,method='GET',body?:unknown):Promise<T>{
- const r=await fetch('/api/'+path,{method,headers:{'X-RoleScout':'1',...(body instanceof FormData?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:body instanceof FormData?body:JSON.stringify(body)});
- const data=await r.json() as T & {error?:string};if(!r.ok)throw new Error(data.error??'요청 실패');return data;
+
+const empty: Profile = {
+  skills: [],
+  languages: [],
+  experience: [],
+  education: [],
+  keywords: [],
+  mode: 'local',
+};
+
+type EditableField =
+  | 'skills'
+  | 'languages'
+  | 'experience'
+  | 'education'
+  | 'keywords'
+  | 'primaryRoleKeywords'
+  | 'skillKeywords'
+  | 'languageKeywords'
+  | 'negativeKeywords';
+
+export default function App() {
+  const [me, setMe] = useState<{ email: string } | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState('');
+  const [profile, setProfile] = useState<Profile>(empty);
+  const [dirty, setDirty] = useState(false);
+  const [text, setText] = useState('');
+  const [linkedin, setLinkedin] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [preferenceNotice, setPreferenceNotice] = useState('');
+  const [result, setResult] = useState<SearchResult | null>(null);
+  const [saved, setSaved] = useState<Job[]>([]);
+  const [savedOnly, setSavedOnly] = useState(false);
+  const [showLow, setShowLow] = useState(false);
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
+  const [detail, setDetail] = useState<Job | null>(null);
+  const [trust, setTrust] = useState<Record<string, Trust>>({});
+  const [resume, setResume] = useState<{ filename: string } | null>(null);
+
+  const preferences = profile.preferences ?? emptyPreferences;
+
+  const load = useCallback(async () => {
+    try {
+      const me = await fetchMe();
+      if (!me) {
+        setLoaded(true);
+        return;
+      }
+      setMe(me);
+      const [p, j, s, t, f] = await Promise.all([
+        api<Profile | null>('profile'),
+        api<SearchResult | null>('search'),
+        api<Job[]>('saved'),
+        api<Record<string, Trust>>('trust'),
+        api<{ filename: string } | null>('resume'),
+      ]);
+      setProfile(p ?? empty);
+      setResult(j);
+      setSaved(s);
+      setTrust(t);
+      setResume(f);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const run = useCallback(async (message: string, fn: () => Promise<void>) => {
+    setBusy(message);
+    setError('');
+    try {
+      await fn();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy('');
+    }
+  }, []);
+
+  const analyze = useCallback(() => {
+    void run('문서에서 텍스트와 항목을 추출하고 있습니다…', async () => {
+      const extracted = file ? await readResume(file) : text;
+      const form = new FormData();
+      form.set('text', extracted);
+      if (file) form.set('file', file);
+      setProfile(await api<Profile>('analyze', 'POST', form));
+      setResume(await api('resume'));
+      setDirty(false);
+      setFile(null);
+      setText('');
+    });
+  }, [file, text, run]);
+
+  const findJobs = useCallback(() => {
+    void run(
+      '프로필 저장 후 공개 채용 보드를 검색하고 있습니다. 최대 30초 정도 걸릴 수 있습니다…',
+      async () => {
+        const p = await api<Profile>('profile', 'PUT', profile);
+        setProfile(p);
+        setDirty(false);
+        setResult(await api<SearchResult>('search', 'POST', {}));
+        setSavedOnly(false);
+      },
+    );
+  }, [profile, run]);
+
+  const edit = useCallback((k: EditableField, value: string) => {
+    setProfile((p) => ({
+      ...p,
+      [k]: value.split(k === 'experience' || k === 'education' ? '\n' : ','),
+    }));
+    setDirty(true);
+  }, []);
+
+  const changePreference = useCallback((change: Partial<Preferences>) => {
+    setProfile((p) => ({
+      ...p,
+      preferences: { ...(p.preferences ?? emptyPreferences), ...change },
+    }));
+    setDirty(true);
+  }, []);
+
+  const parsePreferenceText = useCallback(() => {
+    const parsed = parsePreferences(profile.preferences?.text ?? '');
+    changePreference(parsed.value);
+    setPreferenceNotice(parsed.notice);
+  }, [profile.preferences?.text, changePreference]);
+
+  const resetPreferences = useCallback(() => {
+    changePreference(emptyPreferences);
+    setPreferenceNotice('조건을 초기화했습니다. 다시 검색하면 반영됩니다.');
+  }, [changePreference]);
+
+  const saveProfile = useCallback(() => {
+    void run('프로필 저장 중…', async () => {
+      setProfile(await api<Profile>('profile', 'PUT', profile));
+      setDirty(false);
+    });
+  }, [profile, run]);
+
+  const deleteResume = useCallback(() => {
+    void run('원본을 삭제하고 있습니다…', async () => {
+      await api('resume', 'DELETE');
+      setResume(null);
+    });
+  }, [run]);
+
+  const save = useCallback(
+    (job: Job) => {
+      void run('저장 상태를 변경하고 있습니다…', async () => {
+        await api('saved', saved.some((s) => s.id === job.id) ? 'DELETE' : 'POST', { id: job.id });
+        setSaved(await api('saved'));
+      });
+    },
+    [saved, run],
+  );
+
+  const field = useCallback((k: keyof Filters, v: string | boolean) => {
+    setFilters((f) => ({ ...f, [k]: v }));
+  }, []);
+
+  const deleteAllData = useCallback(() => {
+    if (!window.confirm('본인의 이력서 원본·프로필·검색 결과·저장 공고를 모두 삭제할까요?')) return;
+    void run('개인 데이터를 삭제하고 있습니다…', async () => {
+      await api('data', 'DELETE');
+      setProfile(empty);
+      setResume(null);
+      setResult(null);
+      setSaved([]);
+    });
+  }, [run]);
+
+  const visible = useMemo(
+    () =>
+      filterJobs(savedOnly ? saved : (result?.jobs ?? []), filters).filter(
+        (j) => showLow || j.matchScoreLabel !== 'low',
+      ),
+    [savedOnly, saved, result, filters, showLow],
+  );
+  const allJobs = savedOnly ? saved : (result?.jobs ?? []);
+  const canFind = profile.keywords.some((k) => k.trim());
+
+  if (!loaded) return <main className="loading">서비스에 연결하고 있습니다…</main>;
+  if (!me) return <Login error={error} />;
+
+  return (
+    <main className="workspace">
+      <header className="bar">
+        <a className="brand" href="/">
+          RoleScout
+        </a>
+        <span>{me.email}</span>
+        <a href="/signout-with-chatgpt?return_to=/" target="_top">
+          로그아웃
+        </a>
+      </header>
+      <div className="notice">
+        실제 공개 공고를 조회합니다. 문서 분석은 현재 규칙 기반 기본 추출이며, AI 의미 분석은 API
+        연결 전입니다. 추출 결과와 검색 키워드를 확인해 주세요.
+      </div>
+      {error && (
+        <div className="error" role="alert">
+          {error}
+          <button onClick={() => setError('')}>닫기</button>
+        </div>
+      )}
+      {busy && (
+        <div className="progress" role="status">
+          {busy}
+        </div>
+      )}
+      <ProfilePanel
+        profile={profile}
+        busy={!!busy}
+        dirty={dirty}
+        file={file}
+        text={text}
+        linkedin={linkedin}
+        resume={resume}
+        onFileChange={setFile}
+        onTextChange={setText}
+        onLinkedinChange={setLinkedin}
+        onEdit={edit}
+        onAnalyze={analyze}
+        onSave={saveProfile}
+        onFindJobs={findJobs}
+        onDeleteResume={deleteResume}
+      />
+      <PreferencesPanel
+        preferences={preferences}
+        busy={!!busy}
+        notice={preferenceNotice}
+        canFind={canFind}
+        onChange={changePreference}
+        onParse={parsePreferenceText}
+        onReset={resetPreferences}
+        onFindJobs={findJobs}
+      />
+      <ResultsPanel
+        result={result}
+        saved={saved}
+        savedOnly={savedOnly}
+        showLow={showLow}
+        filters={filters}
+        visible={visible}
+        allJobs={allJobs}
+        busy={!!busy}
+        onToggleSavedOnly={() => setSavedOnly((v) => !v)}
+        onShowLow={setShowLow}
+        onField={field}
+        onOpenDetail={setDetail}
+        onSave={save}
+      />
+      <JobDetailModal job={detail} trust={trust} onClose={() => setDetail(null)} />
+      <details className="panel">
+        <summary>검색 범위와 개인정보 관리</summary>
+        <p>
+          Welo Global(언어·AI), Coupang(한국 등 여러 직군), Mercor(사내 직무)의 공개 채용 보드를
+          조회합니다. 일반 웹 전체 검색이나 모든 원격 플랫폼을 포괄하지 않습니다. 검색어는 서버에서
+          공고와 비교하며 이력서·연락처는 채용 사이트로 보내지 않습니다.
+        </p>
+        <p>
+          문서 원본과 프로필은 삭제할 때까지 보관됩니다. 기본 추출은 제한된 사전과 문장 규칙을
+          사용하므로 누락된 경력·기술·학력은 직접 보완해 주세요. 로그인은 ChatGPT 계정을 사용합니다.
+        </p>
+        <button className="danger" disabled={!!busy} onClick={deleteAllData}>
+          내 데이터 모두 삭제
+        </button>
+      </details>
+    </main>
+  );
 }
-type Trust={name:string;checkedAt:string;summary:string;operator:string;policy:string;experience:string;links:{label:string;url:string}[]};
-export default function App(){
- const [me,setMe]=useState<{email:string}|null>(null),[loaded,setLoaded]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState('');
- const [profile,setProfile]=useState<Profile>(empty),[dirty,setDirty]=useState(false),[text,setText]=useState(''),[linkedin,setLinkedin]=useState(''),[file,setFile]=useState<File|null>(null);
- const [preferenceNotice,setPreferenceNotice]=useState('');
- const preferences=profile.preferences??emptyPreferences;
- function changePreference(change:Partial<Preferences>){setProfile(p=>({...p,preferences:{...(p.preferences??emptyPreferences),...change}}));setDirty(true);}
- const [result,setResult]=useState<SearchResult|null>(null),[saved,setSaved]=useState<Job[]>([]),[savedOnly,setSavedOnly]=useState(false),[showLow,setShowLow]=useState(false),[filters,setFilters]=useState<Filters>(defaultFilters),[detail,setDetail]=useState<Job|null>(null),[trust,setTrust]=useState<Record<string,Trust>>({}),[resume,setResume]=useState<{filename:string}|null>(null);
- async function load(){
-  try{const r=await fetch('/api/me');if(r.status===401){setLoaded(true);return;}if(!r.ok)throw new Error('서비스 연결 실패');setMe(await r.json());
-   const [p,j,s,t,f]=await Promise.all([api<Profile|null>('profile'),api<SearchResult|null>('search'),api<Job[]>('saved'),api<Record<string,Trust>>('trust'),api<{filename:string}|null>('resume')]);setProfile(p??empty);setResult(j);setSaved(s);setTrust(t);setResume(f);
-  }catch(e){setError((e as Error).message);}finally{setLoaded(true);}
- }
- useEffect(()=>{void load();},[]);
- async function run(message:string,fn:()=>Promise<void>){setBusy(message);setError('');try{await fn();}catch(e){setError((e as Error).message);}finally{setBusy('');}}
- async function analyze(){await run('문서에서 텍스트와 항목을 추출하고 있습니다…',async()=>{
-  const extracted=file?await readResume(file):text;
-  const form=new FormData();form.set('text',extracted);if(file)form.set('file',file);
-  setProfile(await api<Profile>('analyze','POST',form));setResume(await api('resume'));setDirty(false);setFile(null);setText('');
- });}
- async function findJobs(){await run('프로필 저장 후 공개 채용 보드를 검색하고 있습니다. 최대 30초 정도 걸릴 수 있습니다…',async()=>{
-  const p=await api<Profile>('profile','PUT',profile);setProfile(p);setDirty(false);setResult(await api<SearchResult>('search','POST',{}));setSavedOnly(false);
- });}
- function edit(k:keyof Pick<Profile,'skills'|'languages'|'experience'|'education'|'keywords'|'primaryRoleKeywords'|'skillKeywords'|'languageKeywords'|'negativeKeywords'>,value:string){setProfile(p=>({...p,[k]:value.split(k==='experience'||k==='education'?'\n':',')}));setDirty(true);}
- const visible=useMemo(()=>filterJobs(savedOnly?saved:result?.jobs??[],filters).filter(j=>showLow||j.matchScoreLabel!=='low'),[savedOnly,saved,result,filters,showLow]);
- const allJobs=savedOnly?saved:result?.jobs??[];
- function field(k:keyof Filters,v:string|boolean){setFilters(f=>({...f,[k]:v}));}
- async function save(job:Job){await run('저장 상태를 변경하고 있습니다…',async()=>{await api('saved',saved.some(s=>s.id===job.id)?'DELETE':'POST',{id:job.id});setSaved(await api('saved'));});}
- if(!loaded)return <main className="loading">서비스에 연결하고 있습니다…</main>;
- if(!me)return <main className="login"><p className="brand">RoleScout</p><h1>내 경력에서 시작하는 공고 탐색</h1><p>이력서를 올리고 실제 채용 조건을 비교하세요. 각 계정의 문서와 저장한 공고는 본인에게만 보입니다.</p><a className="primary" href="/signin-with-chatgpt?return_to=/" target="_top">ChatGPT 계정으로 로그인</a>{error&&<p role="alert">{error}</p>}<p className="muted">현재 링크를 받은 사람이 로그인할 수 있는 테스트 서비스입니다.</p></main>;
- return <main className="workspace">
-  <header className="bar"><a className="brand" href="/">RoleScout</a><span>{me.email}</span><a href="/signout-with-chatgpt?return_to=/" target="_top">로그아웃</a></header>
-  <div className="notice">실제 공개 공고를 조회합니다. 문서 분석은 현재 규칙 기반 기본 추출이며, AI 의미 분석은 API 연결 전입니다. 추출 결과와 검색 키워드를 확인해 주세요.</div>
-  {error&&<div className="error" role="alert">{error}<button onClick={()=>setError('')}>닫기</button></div>}
-  {busy&&<div className="progress" role="status">{busy}</div>}
-  <section className="panel"><h1>내 프로필</h1><p className="muted">희망 보수나 근무시간은 입력하지 않아도 됩니다. 먼저 이력서를 읽거나 프로필을 직접 작성하세요.</p>
-   <div className="input-grid"><div><label>이력서 PDF / DOCX (최대 5MB)<input type="file" accept=".pdf,.docx" disabled={!!busy} onChange={e=>setFile(e.target.files?.[0]??null)}/></label><label>또는 이력서 텍스트<textarea value={text} onChange={e=>setText(e.target.value)} rows={5} placeholder="경력·기술·언어·학력이 포함된 텍스트" disabled={!!file}/></label><label>LinkedIn 프로필 URL<input type="url" value={linkedin} onChange={e=>setLinkedin(e.target.value)} placeholder="https://www.linkedin.com/in/…"/></label>{linkedin&&<p className="notice">LinkedIn 전체 경력을 가져오는 공식 권한이 연결되지 않았습니다. 프로필 PDF 또는 텍스트를 위에 제공해 주세요. URL만으로는 분석되지 않습니다.</p>}<p className="muted">텍스트 추출은 브라우저에서 진행하며, 파일 원본과 추출 항목은 본인 계정의 비공개 저장소에 보관됩니다. 현재 외부 AI로 전송하지 않습니다.</p><button className="primary" disabled={!!busy||!file&&!text.trim()} onClick={analyze}>이력서 읽기</button>{resume&&<p>저장된 원본: {resume.filename} <button disabled={!!busy} onClick={()=>run('원본을 삭제하고 있습니다…',async()=>{await api('resume','DELETE');setResume(null);})}>원본만 삭제</button></p>}</div>
-   <div>{(['skills','languages','experience','education','keywords'] as const).map(k=><label key={k}>{({skills:'기술·역량 (쉼표 구분)',languages:'언어 (쉼표 구분)',experience:'경력 (줄 구분)',education:'학력 (줄 구분)',keywords:'공고 검색 키워드 (쉼표 구분)'}[k])}<textarea rows={k==='experience'?3:2} value={profile[k].join(k==='experience'||k==='education'?'\n':',')} onChange={e=>edit(k,e.target.value)}/></label>)}<details><summary>검색 키워드 분류 (선택 수정)</summary>{(['primaryRoleKeywords','skillKeywords','languageKeywords','negativeKeywords'] as const).map(k=><label key={k}>{({primaryRoleKeywords:'핵심 직무 키워드',skillKeywords:'기술·업무 키워드',languageKeywords:'언어 키워드',negativeKeywords:'제외 키워드'}[k])}<textarea rows={2} value={(profile[k]??[]).join(',')} onChange={e=>edit(k,e.target.value)}/></label>)}<p className="muted">이력서에서 자동 분류된 값이며 직접 수정할 수 있습니다. 제외 키워드가 포함된 공고는 검색에서 제외합니다.</p></details><div className="actions"><button disabled={!!busy} onClick={()=>run('프로필 저장 중…',async()=>{setProfile(await api('profile','PUT',profile));setDirty(false);})}>프로필 저장{dirty?' *':''}</button><button className="primary" disabled={!!busy||!profile.keywords.some(k=>k.trim())} onClick={findJobs}>공고 찾기</button></div></div></div>
-  </section>
-  <section className="panel"><h2>원하는 근무조건 (선택)</h2><label>원하는 조건을 편하게 적어 주세요<textarea rows={3} maxLength={2000} value={preferences.text} disabled={!!busy} placeholder="예: 한국에서 가능한 원격근무, 프리랜서, 주 20시간 이하" onChange={e=>changePreference({text:e.target.value})}/></label><button disabled={!!busy||!preferences.text.trim()} onClick={()=>{const parsed=parsePreferences(preferences.text);changePreference(parsed.value);setPreferenceNotice(parsed.notice);}}>조건 해석하기</button><p className="muted">문장을 수정한 뒤 조건 해석하기를 눌러 주세요. 아래 항목을 확인·수정하고 검색하면 적용됩니다. 현재 기본 표현을 규칙으로 해석하며 외부 AI에는 전송하지 않습니다.</p>{preferenceNotice&&<p role="status" className="notice">{preferenceNotice}</p>}<div className="filters-grid"><label className="checkbox"><input type="checkbox" checked={preferences.remote} onChange={e=>changePreference({remote:e.target.checked})}/>원격 명시 공고만</label><label className="checkbox"><input type="checkbox" checked={preferences.korea} onChange={e=>changePreference({korea:e.target.checked})}/>한국 근무 확인만</label><label>근무 지역 (공고 표기)<input value={preferences.location} placeholder="예: Seoul" onChange={e=>changePreference({location:e.target.value})}/></label><label>희망 계약 형태<select value={preferences.contract} onChange={e=>changePreference({contract:e.target.value})}><option value="">제한 없음</option>{['프리랜서','계약직','정규직','파트타임'].map(v=><option key={v}>{v}</option>)}</select></label><label>주당 최대 근무시간<input type="number" min="0" max="168" value={preferences.maxWeeklyHours} onChange={e=>changePreference({maxWeeklyHours:e.target.value})}/></label></div><p className="muted">선택한 조건은 모두 충족해야 합니다. 해당 조건을 확인할 수 없는 공고는 제외됩니다. 주당 시간은 공고에 명시된 범위의 상한을 비교합니다. 지역은 공고의 근무지 표기로 검색됩니다.</p><div className="actions"><button disabled={!!busy} onClick={()=>{changePreference(emptyPreferences);setPreferenceNotice('조건을 초기화했습니다. 다시 검색하면 반영됩니다.');}}>희망조건 초기화</button><button className="primary" disabled={!!busy||!profile.keywords.some(k=>k.trim())} onClick={findJobs}>이 조건으로 공고 찾기</button></div></section>
-  <section className="panel"><div className="heading"><h2>{savedOnly?'저장한 공고':'검색 결과'} <span>{visible.length}</span></h2><button onClick={()=>setSavedOnly(!savedOnly)}>{savedOnly?'검색 결과 보기':`저장한 공고 (${saved.length})`}</button></div>
-  {result&&<><p className="muted">검색: {date(result.searchedAt)} · 키워드: {result.keywords.join(', ')} · 최대 150건 표시</p><div className="sources">{result.sources.map(s=><span key={s.source} className={s.error?'error':'source'}>{s.source}: {s.error??`${s.count}건 일치${s.cached?' · 15분 내 캐시':''}`}<small>{s.checkedAt?date(s.checkedAt):'확인 실패'}</small></span>)}</div></>}
-  <div className="filters-grid"><label>키워드<input value={filters.query} onChange={e=>field('query',e.target.value)}/></label><label>계약 형태<select value={filters.contract} onChange={e=>field('contract',e.target.value)}><option value="">전체</option>{[...new Set(allJobs.map(j=>j.contract))].map(v=><option key={v}>{v}</option>)}</select></label><label>최소 보수<input type="number" min="0" step="any" value={filters.minimum} disabled={!filters.unit||!filters.currency} onChange={e=>field('minimum',e.target.value)}/></label><label>지급 단위<select value={filters.unit} onChange={e=>field('unit',e.target.value)}><option value="">전체</option>{Object.entries(units).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></label><label>통화<select value={filters.currency} onChange={e=>field('currency',e.target.value)}><option value="">전체</option>{[...new Set(allJobs.map(j=>j.compensation.currency).filter(Boolean))].map(v=><option key={v!}>{v}</option>)}</select></label><label>근무 방식<select value={filters.workMode} onChange={e=>field('workMode',e.target.value)}><option value="">전체</option>{[...new Set(allJobs.map(j=>j.workMode))].map(v=><option key={v}>{v}</option>)}</select></label><label>한국 근무<select value={filters.korea} onChange={e=>field('korea',e.target.value)}><option value="">전체</option>{Object.entries(korea).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></label><label>게시일<select value={filters.days} onChange={e=>field('days',e.target.value)}><option value="">전체 / 미기재 포함</option><option value="7">최근 7일</option><option value="30">최근 30일</option></select></label><label>정렬<select value={filters.sort} onChange={e=>field('sort',e.target.value)}><option value="match">일치 키워드 많은 순</option><option value="newest">게시일 최신순</option><option value="pay" disabled={!filters.unit||!filters.currency}>최소 보수 높은 순</option></select></label><label className="checkbox"><input type="checkbox" checked={filters.includeUnknown} onChange={e=>field('includeUnknown',e.target.checked)}/>보수 미기재 포함</label><button onClick={()=>setFilters(defaultFilters)}>필터 초기화</button></div>
-  <p className="muted">최소 보수·보수순 정렬은 통화와 지급 단위를 모두 선택한 뒤 사용합니다. 공고의 하한 금액을 비교하며 상한만 있는 공고는 최소 보수 조건을 충족한 것으로 보지 않습니다. 미기재 포함을 선택하면 금액 없는 공고는 별도로 유지됩니다.</p>
-  <label className="checkbox"><input type="checkbox" checked={showLow} onChange={e=>setShowLow(e.target.checked)}/>낮은 관련성 결과도 보기</label><div className="table-scroll"><table><thead><tr>{['직무 / 회사','매치 적합도','매치 근거','계약 형태','보수','지급 단위','통화','근무 조건','출처 / 검증','게시일',''].map((h,i)=><th key={i}>{h}</th>)}</tr></thead><tbody>{visible.map(j=><tr key={j.id}><td><button className="job-title" onClick={()=>setDetail(j)}>{j.title}</button><p>{j.company}</p><small>{j.kind}</small></td><td><button className={`score ${j.matchScoreLabel??'low'}`} onClick={()=>setDetail(j)}>{j.matchScore??0}%</button><small>{j.matchScoreLabel??'unknown'} · {j.scoreVersion??'legacy'}</small></td><td>{(j.matchedEvidence??j.match).join(', ')||'일치 근거 미확인'}</td><td>{j.contract}</td><td className="money">{j.compensation.min===null&&j.compensation.max===null?'—':`${j.compensation.min?.toLocaleString()??'—'}${j.compensation.max!==j.compensation.min?` – ${j.compensation.max?.toLocaleString()??'—'}`:''}`}</td><td>{j.compensation.unit?units[j.compensation.unit]:'미기재'}</td><td>{j.compensation.currency??'미기재'}</td><td>{j.workMode}<p>{j.location}</p><small>{korea[j.korea]}</small><p>{j.hours??'근무시간 미기재'}</p></td><td>{j.source}<p>ATS 원문 확인</p><small>지급 {j.platform==='welo'?'근거 있음 · 상세 확인':'미검증'}</small></td><td>{date(j.postedAt)}</td><td><button disabled={!!busy} onClick={()=>save(j)}>{saved.some(s=>s.id===j.id)?'저장 해제':'저장'}</button><a className="external" href={j.url} target="_blank" rel="noopener noreferrer">원문 ↗</a></td></tr>)}</tbody></table></div>
-  {!visible.length&&<div className="empty">{result||savedOnly?'현재 조건에 맞는 공고가 없습니다. 필터를 초기화하거나 프로필의 검색 키워드를 바꿔 보세요.':'프로필을 확인하고 공고 찾기를 눌러 주세요.'}</div>}
-  </section>
-  {detail&&<div className="overlay" onClick={()=>setDetail(null)}><section className="detail" role="dialog" aria-modal="true" aria-label="공고 상세" onClick={e=>e.stopPropagation()}><button autoFocus onClick={()=>setDetail(null)}>닫기</button><h2>{detail.title}</h2><p>{detail.company} · {detail.kind}</p><h3>이력서 매치 적합도: {detail.matchScore??0}% ({detail.matchScoreLabel??'unknown'})</h3><p>이 점수는 이력서에 명시된 정보와 공고 원문의 일치 정도를 계산한 참고 지표이며, 합격 가능성을 예측하지 않습니다.</p><p>{detail.scoreExplanation??'기존 검색 결과에는 점수 근거가 없습니다.'} · 기준 {detail.scoreVersion??'legacy'} · {detail.scoreBasis==='ai'?'AI':'규칙 기반'}</p><ul>{(detail.matchedEvidence??[]).map(x=><li key={x}>일치: {x}</li>)}{(detail.missingEvidence??[]).map(x=><li key={x}>미확인: {x}</li>)}</ul><p>{detail.sourceStatus}</p><p>{detail.koreaEvidence}</p><p>보수 원문: {detail.compensation.note||'보수 미기재'}</p><p>조회 당시 {detail.status==='open'?'공개 모집 목록에 존재':'상태 미확인'} · 마지막 확인 {date(detail.checkedAt)}</p><a href={detail.url} target="_blank" rel="noopener noreferrer">원문에서 현재 상태 확인 ↗</a><h3>업무 / 자격 원문</h3><p className="description">{detail.description}</p><h3>플랫폼 / 지급 검토</h3>{detail.platform&&trust[detail.platform]?<TrustDetails item={trust[detail.platform]}/>:<p>개별 회사의 지급·계약 이력은 미검증입니다. ATS 원문 조회가 지급 보증을 뜻하지 않습니다.</p>}</section></div>}
-  <details className="panel"><summary>검색 범위와 개인정보 관리</summary><p>Welo Global(언어·AI), Coupang(한국 등 여러 직군), Mercor(사내 직무)의 공개 채용 보드를 조회합니다. 일반 웹 전체 검색이나 모든 원격 플랫폼을 포괄하지 않습니다. 검색어는 서버에서 공고와 비교하며 이력서·연락처는 채용 사이트로 보내지 않습니다.</p><p>문서 원본과 프로필은 삭제할 때까지 보관됩니다. 기본 추출은 제한된 사전과 문장 규칙을 사용하므로 누락된 경력·기술·학력은 직접 보완해 주세요. 로그인은 ChatGPT 계정을 사용합니다.</p><button className="danger" disabled={!!busy} onClick={()=>{if(window.confirm('본인의 이력서 원본·프로필·검색 결과·저장 공고를 모두 삭제할까요?'))void run('개인 데이터를 삭제하고 있습니다…',async()=>{await api('data','DELETE');setProfile(empty);setResume(null);setResult(null);setSaved([]);});}}>내 데이터 모두 삭제</button></details>
- </main>;
-}
-function TrustDetails({item}:{item:Trust}){return <><p>{item.name} · 확인 {item.checkedAt}</p><p>{item.summary}</p><p>{item.operator}</p><h4>공식 정책</h4><p>{item.policy}</p><h4>외부 이용자 주장</h4><p>{item.experience}</p><ul>{item.links.map(l=><li key={l.url}><a href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a></li>)}</ul></>;}

@@ -7,8 +7,12 @@
     "dev": "vite --config vite.config.ts",
     "build": "node scripts/clean-build.mjs && tsc --noEmit && vite build --config vite.config.ts && esbuild server/worker.ts --bundle --format=esm --platform=browser --outfile=dist/server/index.js",
     "test": "tsx --test tests/*.test.ts",
+    "lint": "eslint src server tests",
+    "lint:fix": "eslint src server tests --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"server/**/*.ts\" \"tests/**/*.ts\"",
     "db:generate": "drizzle-kit generate",
     "db:local": "wrangler d1 migrations apply rolescout-local --local",
+    "prepare": "husky",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -24,11 +28,28 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260908.1",
+    "@eslint/js": "^9.39.5",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "drizzle-kit": "^0.31.10",
     "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "prettier": "^3.9.7",
     "tsx": "^4.23.13",
+    "typescript-eslint": "^8.70.0",
     "wrangler": "^4.129.1"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,mjs,cjs,json,md,css}": [
+      "prettier --write"
+    ]
   }
 }
