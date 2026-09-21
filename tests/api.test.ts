@@ -65,12 +65,36 @@ test('real local D1/R2: identity separation, save persistence, deletion, auth an
       .bind(a, 'tests/' + a, 'test.txt', new Date().toISOString())
       .run();
     assert.equal(await (await call(b, 'resume')).json(), null);
+    const today = new Date().toISOString().slice(0, 10);
+    await env.DB.prepare('INSERT INTO limits(key,count) VALUES(?,?)')
+      .bind(`${today}:${a}:analyze`, 2)
+      .run();
+    await env.DB.prepare('INSERT INTO limits(key,count) VALUES(?,?)')
+      .bind(`${today}:${b}:search`, 3)
+      .run();
     await call(b, 'data', 'DELETE');
     assert.ok(await env.FILES.get('tests/' + a));
+    assert.equal(
+      await env.DB.prepare('SELECT count FROM limits WHERE key=?')
+        .bind(`${today}:${b}:search`)
+        .first(),
+      null,
+    );
+    assert.ok(
+      await env.DB.prepare('SELECT count FROM limits WHERE key=?')
+        .bind(`${today}:${a}:analyze`)
+        .first(),
+    );
     await call(a, 'data', 'DELETE');
     assert.equal(await env.FILES.get('tests/' + a), null);
     assert.equal(await (await call(a, 'profile')).json(), null);
     assert.equal(((await (await call(a, 'saved')).json()) as unknown[]).length, 0);
+    assert.equal(
+      await env.DB.prepare('SELECT count FROM limits WHERE key=?')
+        .bind(`${today}:${a}:analyze`)
+        .first(),
+      null,
+    );
   } finally {
     await call(a, 'data', 'DELETE');
     await call(b, 'data', 'DELETE');

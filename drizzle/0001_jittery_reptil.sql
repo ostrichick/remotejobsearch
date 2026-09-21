@@ -1,0 +1,1 @@
+ALTER TABLE `searches` ADD `profile_hash` text;

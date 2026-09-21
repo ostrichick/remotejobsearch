@@ -55,6 +55,7 @@ export default function PreferencesPanel({
             type="checkbox"
             checked={preferences.remote}
             onChange={(e) => onChange({ remote: e.target.checked })}
+            disabled={!!busy}
           />
           원격 명시 공고만
         </label>
@@ -63,6 +64,7 @@ export default function PreferencesPanel({
             type="checkbox"
             checked={preferences.korea}
             onChange={(e) => onChange({ korea: e.target.checked })}
+            disabled={!!busy}
           />
           한국 근무 확인만
         </label>
@@ -72,6 +74,7 @@ export default function PreferencesPanel({
             value={preferences.location}
             placeholder="예: Seoul"
             onChange={(e) => onChange({ location: e.target.value })}
+            disabled={!!busy}
           />
         </label>
         <label>
@@ -79,6 +82,7 @@ export default function PreferencesPanel({
           <select
             value={preferences.contract}
             onChange={(e) => onChange({ contract: e.target.value })}
+            disabled={!!busy}
           >
             <option value="">제한 없음</option>
             {contractOptions.map((v) => (
@@ -94,6 +98,7 @@ export default function PreferencesPanel({
             max="168"
             value={preferences.maxWeeklyHours}
             onChange={(e) => onChange({ maxWeeklyHours: e.target.value })}
+            disabled={!!busy}
           />
         </label>
       </div>

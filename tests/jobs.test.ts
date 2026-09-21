@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalize, plain, sources } from '../server/jobs';
+import { compensation, koreaStatus, normalize, plain, sources } from '../server/jobs';
 
 test('plain strips html but preserves paragraphs', () => {
   assert.equal(
@@ -86,4 +86,91 @@ test('korea only confirmed when location or residence stated', () => {
   };
   const j = normalize(raw, sources[2], '2026-09-11T00:00:00Z');
   assert.equal(j.korea, 'unknown');
+});
+
+test('North Korea and DPRK are never mistaken for South Korea', () => {
+  for (const location of [
+    'North Korea',
+    'Pyongyang, DPRK',
+    '북한',
+    'Korea, Democratic Peoples Republic of',
+  ]) {
+    assert.equal(koreaStatus(location, '').korea, 'excluded', location);
+  }
+  assert.equal(koreaStatus('Korea, Republic of', '').korea, 'confirmed');
+  assert.equal(koreaStatus('Remote', 'Applicants based in North Korea').korea, 'unknown');
+  assert.equal(koreaStatus('Seoul, South Korea', 'Not eligible for South Korea').korea, 'excluded');
+  assert.equal(koreaStatus('Remote', 'Remote globally, Korea not specified').korea, 'unknown');
+});
+
+test('compensation retains lower/upper semantics and never invents currency or pay unit', () => {
+  assert.deepEqual(compensation('Pay from USD 25 per hour'), {
+    min: 25,
+    max: null,
+    currency: 'USD',
+    unit: 'hour',
+    note: 'Pay from USD 25 per hour',
+  });
+  assert.deepEqual(compensation('Pay up to USD 40 per hour'), {
+    min: null,
+    max: 40,
+    currency: 'USD',
+    unit: 'hour',
+    note: 'Pay up to USD 40 per hour',
+  });
+  assert.equal(
+    compensation('Pay $30 per hour').currency,
+    null,
+    'unqualified dollars are ambiguous',
+  );
+  assert.equal(compensation('Equipment stipend: USD 500 per year').min, null);
+  assert.equal(compensation('Annual salary USD 100,000-80,000').min, null);
+  assert.equal(compensation('Pay approximately USD 30 per hour').min, null);
+  assert.deepEqual(compensation('Buy a laptop for USD 500'), {
+    min: null,
+    max: null,
+    currency: null,
+    unit: null,
+    note: '',
+  });
+});
+
+test('bad structured compensation remains unknown or falls back to explicit original pay', () => {
+  const input = {
+    id: 'bad-pay',
+    title: 'Korean reviewer',
+    descriptionPlain: 'Pay USD 30 per hour',
+    location: 'Remote',
+    workplaceType: 'Remote',
+    jobUrl: 'https://jobs.ashbyhq.com/mercor/bad-pay',
+    salaryRange: { min: 40, max: 30, currency: '$', interval: 'hour' },
+  };
+  const fallback = normalize(input, sources[2], '2026-09-11T00:00:00Z');
+  assert.equal(fallback.compensation.min, 30);
+  assert.equal(fallback.compensation.currency, 'USD');
+  const upper = normalize(
+    { ...input, salaryRange: { max: 70, currency: '$', interval: 'year' } },
+    sources[2],
+    '2026-09-11T00:00:00Z',
+  );
+  assert.equal(upper.compensation.min, null);
+  assert.equal(upper.compensation.max, 70);
+  assert.equal(upper.compensation.currency, null);
+});
+
+test('explicit advance-payment signal is attached as a review clue, not a fraud finding', () => {
+  const j = normalize(
+    {
+      id: 'risky',
+      title: 'Korean AI Evaluator',
+      descriptionPlain: 'Applicants must pay a training fee before work begins.',
+      location: 'Remote',
+      workplaceType: 'Remote',
+      jobUrl: 'https://jobs.ashbyhq.com/mercor/risky',
+    },
+    sources[2],
+    '2026-09-11T00:00:00Z',
+  );
+  assert.equal(j.safetySignals?.length, 1);
+  assert.match(j.safetySignals?.[0] ?? '', /확인 필요/);
 });

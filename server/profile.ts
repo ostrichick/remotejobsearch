@@ -76,6 +76,30 @@ function validateStringArray(value: unknown, maxCount: number, maxLength: number
   return (value as string[]).map((x) => x.trim()).filter(Boolean);
 }
 
+function validateLinkedinUrl(value: unknown): string {
+  if (value === undefined || value === null || value === '') return '';
+  if (typeof value !== 'string' || value.length > 500)
+    throw new Error('LinkedIn URL 형식이 올바르지 않습니다.');
+  const input = value.trim();
+  if (!input) return '';
+  let url: URL;
+  try {
+    url = new URL(input);
+  } catch {
+    throw new Error('LinkedIn URL 형식이 올바르지 않습니다.');
+  }
+  if (
+    url.protocol !== 'https:' ||
+    !['linkedin.com', 'www.linkedin.com'].includes(url.hostname.toLowerCase()) ||
+    url.port ||
+    url.username ||
+    url.password ||
+    !/^\/in\/[a-zA-Z0-9_%-]+\/?$/.test(url.pathname)
+  )
+    throw new Error('LinkedIn URL은 공식 linkedin.com/in 프로필 주소만 허용됩니다.');
+  return `https://www.linkedin.com${url.pathname.replace(/\/$/, '')}/`;
+}
+
 export function extractProfile(text: string): Profile {
   const lines = text
     .split(/\n/)
@@ -127,6 +151,7 @@ export function validateProfile(value: unknown): Profile {
     out[k] = list;
   }
   out.preferences = validatePreferences(v.preferences);
+  out.linkedinUrl = validateLinkedinUrl(v.linkedinUrl);
   for (const k of keywordFields) {
     if (v[k] === undefined) {
       out[k] = [];

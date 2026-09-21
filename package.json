@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --config vite.config.ts",
     "build": "node scripts/clean-build.mjs && tsc --noEmit && vite build --config vite.config.ts && esbuild server/worker.ts --bundle --format=esm --platform=browser --outfile=dist/server/index.js",
-    "test": "tsx --test tests/*.test.ts",
+    "test": "tsx --test --test-concurrency=1 tests/*.test.ts",
     "lint": "eslint src server tests",
     "lint:fix": "eslint src server tests --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"server/**/*.ts\" \"tests/**/*.ts\"",

@@ -1,0 +1,21 @@
+CREATE TABLE `job_evaluations` (
+	`user_id` text NOT NULL,
+	`job_id` text NOT NULL,
+	`relevance` text NOT NULL,
+	`korea` text NOT NULL,
+	`salary` text NOT NULL,
+	`language` text NOT NULL,
+	`notes` text NOT NULL,
+	`title` text NOT NULL,
+	`company` text NOT NULL,
+	`source` text NOT NULL,
+	`score` integer,
+	`score_version` text NOT NULL,
+	`predicted_korea` text NOT NULL,
+	`language_evidence` text NOT NULL,
+	`salary_snapshot` text NOT NULL,
+	`searched_at` text NOT NULL,
+	`created_at` text NOT NULL,
+	`updated_at` text NOT NULL,
+	PRIMARY KEY(`user_id`, `job_id`)
+);

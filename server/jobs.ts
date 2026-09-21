@@ -1,30 +1,89 @@
 import type { Compensation, Job, Profile, SearchResult, SourceResult } from '../src/domain';
 import type { Env } from './env';
 import { matchesPreferences } from '../src/preferences';
-import { scoreJob } from './relevance';
-export const sources = [
-  {
-    id: 'welo',
-    name: 'Welo Global · Lever',
-    company: 'Welo Global',
-    type: 'lever',
-    url: 'https://api.lever.co/v0/postings/weloglobal?mode=json',
-  },
-  {
-    id: 'coupang',
-    name: 'Coupang · Greenhouse',
-    company: 'Coupang',
-    type: 'greenhouse',
-    url: 'https://boards-api.greenhouse.io/v1/boards/coupang/jobs?content=true',
-  },
-  {
-    id: 'mercor',
-    name: 'Mercor · Ashby',
-    company: 'Mercor',
-    type: 'ashby',
-    url: 'https://api.ashbyhq.com/posting-api/job-board/mercor?includeCompensation=true',
-  },
-] as const;
+import {
+  matchesSearchKeyword,
+  matchesTextTerm,
+  missingTitleLanguages,
+  scoreJob,
+} from './relevance';
+import { detectSafetySignals } from './safety';
+import { isValidSourceUrl, parseAtsFeed, sources, type RawPosting } from './ats';
+export { isValidSourceUrl, sources } from './ats';
+
+type Source = (typeof sources)[number];
+
+/** Keep ATS query identifiers; remove only parameters known to be acquisition tracking. */
+export function canonicalJobUrl(value: string): string | null {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || url.username || url.password || url.port) return null;
+    const host = url.hostname.toLowerCase();
+    if (
+      !/^[a-z0-9.-]+$/.test(host) ||
+      !host.includes('.') ||
+      /(?:^|\.)(?:localhost|local|internal|test|example)$/.test(host) ||
+      /^(?:\d{1,3}\.){3}\d{1,3}$/.test(host) ||
+      /^\d+$/.test(host)
+    )
+      return null;
+    // Provider lookalikes cannot be treated as genuine ATS hosts.
+    if (
+      /(?:lever\.co|greenhouse\.io|ashbyhq\.com)/.test(host) &&
+      !/(?:^|\.)(?:lever\.co|greenhouse\.io|ashbyhq\.com)$/.test(host)
+    )
+      return null;
+    for (const key of [...url.searchParams.keys()]) {
+      if (/^utm_|^(?:gclid|dclid|fbclid|msclkid|mc_cid|mc_eid|gh_src|lever-source)$/i.test(key))
+        url.searchParams.delete(key);
+    }
+    url.searchParams.sort();
+    return url.href;
+  } catch {
+    return null;
+  }
+}
+
+/** A company may configure an external application URL in its official ATS feed. */
+export function isRecognizedAtsJobUrl(value: string, type: Source['type']): boolean {
+  const canonical = canonicalJobUrl(value);
+  if (!canonical) return false;
+  const url = new URL(canonical);
+  const host = url.hostname;
+  const path = url.pathname.split('/').filter(Boolean);
+  return type === 'lever'
+    ? host === 'jobs.lever.co' && path.length >= 2
+    : type === 'greenhouse'
+      ? (host === 'boards.greenhouse.io' || host === 'job-boards.greenhouse.io') &&
+        (path.length >= 3 || (path.length >= 1 && url.searchParams.has('gh_jid')))
+      : host === 'jobs.ashbyhq.com' && path.length >= 2;
+}
+
+export function isValidJobUrl(value: string, type: Source['type']): boolean {
+  const canonical = canonicalJobUrl(value);
+  if (!canonical) return false;
+  const host = new URL(canonical).hostname;
+  // An ATS's API or homepage must not masquerade as an individual job link.
+  if (['api.lever.co', 'boards-api.greenhouse.io', 'api.ashbyhq.com'].includes(host)) return false;
+  if (
+    [
+      'jobs.lever.co',
+      'boards.greenhouse.io',
+      'job-boards.greenhouse.io',
+      'jobs.ashbyhq.com',
+    ].includes(host)
+  )
+    return (
+      isRecognizedAtsJobUrl(value, type) ||
+      (['lever', 'greenhouse', 'ashby'] as const).some((provider) =>
+        isRecognizedAtsJobUrl(value, provider),
+      )
+    );
+  // Official ATS feeds sometimes point to the company's own application system.
+  // Keep HTTPS links to other public domains, labelled as unverified external URLs.
+  return true;
+}
+
 export function plain(s: unknown): string {
   return String(s ?? '')
     .replace(/<\/(?:p|div|li|h\d)>|<br\s*\/?\s*>/gi, '\n')
@@ -39,17 +98,29 @@ export function plain(s: unknown): string {
 }
 export function compensation(text: string): Compensation {
   const empty: Compensation = { min: null, max: null, currency: null, unit: null, note: '' };
-  const line = text.split('\n').find((l) => /(?:USD|KRW|EUR|GBP|\$|₩|€|£)\s*[\d,.]+/.test(l));
+  const line = text
+    .split('\n')
+    .find(
+      (l) =>
+        /(?:USD|KRW|EUR|GBP|AUD|CAD|US\$|A\$|C\$|\$|₩|€|£)\s*[\d,.]+/i.test(l) &&
+        /pay|compensat|salary|wage|rate|earn|per |hour|day|week|month|year|annual|project|task|audio|보수|급여|시급|연봉|월급|주급|일급|건당|프로젝트/i.test(
+          l,
+        ),
+    );
   if (!line) return empty;
-  const currency = /USD|US\$/.test(line)
+  const currency = /USD|US\$/i.test(line)
     ? 'USD'
-    : /KRW|₩/.test(line)
+    : /KRW|₩/i.test(line)
       ? 'KRW'
-      : /EUR|€/.test(line)
+      : /EUR|€/i.test(line)
         ? 'EUR'
-        : /GBP|£/.test(line)
+        : /GBP|£/i.test(line)
           ? 'GBP'
-          : null;
+          : /AUD|A\$/i.test(line)
+            ? 'AUD'
+            : /CAD|C\$/i.test(line)
+              ? 'CAD'
+              : null;
   const unit = /audio.{0,12}hour|per finished hour/i.test(line)
     ? 'audio_hour'
     : /audio.{0,12}minute/i.test(line)
@@ -69,14 +140,20 @@ export function compensation(text: string): Compensation {
                   : /project|프로젝트/i.test(line)
                     ? 'project'
                     : null;
-  if (/approximately|estimated|up to.*daily/i.test(line) || (unit === 'task' && /hour/i.test(line)))
+  if (
+    /approximately|estimated|estimate|about|roughly|대략|추정/i.test(line) ||
+    /stipend|reimbursement|equipment|allowance/i.test(line) ||
+    (unit === 'task' && /hour/i.test(line))
+  )
     return { ...empty, currency, unit, note: line.trim() };
   const match = line.match(
-    /(?:USD|KRW|EUR|GBP|\$|₩|€|£)\s*([\d,]+(?:\.\d+)?)(?:\s*[-–—]\s*(?:USD|KRW|EUR|GBP|\$|₩|€|£)?\s*([\d,]+(?:\.\d+)?))?/,
+    /(?:USD|KRW|EUR|GBP|AUD|CAD|US\$|A\$|C\$|\$|₩|€|£)\s*([\d,]+(?:\.\d+)?)(?:\s*(?:-|–|—|to)\s*(?:USD|KRW|EUR|GBP|AUD|CAD|US\$|A\$|C\$|\$|₩|€|£)?\s*([\d,]+(?:\.\d+)?))?/i,
   );
   if (!match) return empty;
   const n = Number(match[1].replaceAll(',', '')),
     upper = match[2] ? Number(match[2].replaceAll(',', '')) : n;
+  if (!Number.isFinite(n) || !Number.isFinite(upper) || n < 0 || upper < n)
+    return { ...empty, currency, unit, note: line.trim() };
   return {
     min: /up to|maximum|최대/i.test(line) ? null : n,
     max: /starting|from|최소/i.test(line) && !match[2] ? null : upper,
@@ -90,77 +167,47 @@ export function koreaStatus(
   description: string,
 ): Pick<Job, 'korea' | 'koreaEvidence'> {
   const explicit = description.match(
-    /[^\n.]*(?:not (?:available|eligible).{0,25}(?:Korea)|excluding.{0,20}Korea|(?:US|United States)[ -]only)[^\n.]*/i,
+    /[^\n.]*(?:not (?:available|eligible).{0,35}(?:South Korea|Korea)|exclud(?:ing|es?).{0,25}(?:South Korea|Korea)|(?:US|United States)[ -]only\b|only (?:in|within|for) (?:the )?(?:US|United States)\b)[^\n.]*/i,
   );
   if (explicit) return { korea: 'excluded', koreaEvidence: explicit[0] };
-  if (/south korea|republic of korea|seoul|대한민국|서울|\bKorea\b/i.test(location))
+  const south =
+    /\bsouth korea\b|\brepublic of korea\b|\bkorea,?\s+republic of\b|\bseoul\b|대한민국|남한|서울|부산|인천|대구|대전|광주|울산|제주/i;
+  const north =
+    /\bnorth korea(?:n)?\b|\bdprk\b|\bpyongyang\b|\bdemocratic people'?s republic of korea\b|\bkorea,?\s+democratic people'?s republic of\b|북한|평양|조선민주주의인민공화국/i;
+  if (south.test(location) || (!north.test(location) && /\bkorea\b|한국/i.test(location)))
     return {
       korea: 'confirmed',
       koreaEvidence: `공고 근무지: ${location}. 별도 근무 자격은 원문 확인.`,
     };
+  if (north.test(location))
+    return {
+      korea: 'excluded',
+      koreaEvidence: `공고 근무지: ${location}. 대한민국 근무지로 해석할 수 없습니다.`,
+    };
   const sentence = description.match(
-    /[^\n.]*(?:resident.{0,15}Korea|based in Korea|한국 거주)[^\n.]*/i,
+    /[^\n.]*(?:resident.{0,15}(?:South Korea|Korea)|based in (?:South Korea|Korea)|한국 거주|대한민국 거주)[^\n.]*/i,
   );
-  if (sentence) return { korea: 'confirmed', koreaEvidence: sentence[0] };
+  if (sentence && !north.test(sentence[0]))
+    return { korea: 'confirmed', koreaEvidence: sentence[0] };
   return {
     korea: 'unknown',
     koreaEvidence: '한국 거주자의 근무·계약 가능 여부를 명시적으로 확인하지 못했습니다.',
   };
-}
-interface RawList {
-  text?: string;
-  content?: string;
-}
-interface RawCategory {
-  allLocations?: string[];
-  location?: string;
-  commitment?: string;
-}
-interface RawLocation {
-  name?: string;
-}
-interface RawSalaryRange {
-  min?: number;
-  max?: number;
-  currency?: string;
-  interval?: string;
-}
-interface RawPosting {
-  id?: string;
-  text?: string;
-  title?: string;
-  descriptionPlain?: string;
-  descriptionHtml?: string;
-  content?: string;
-  lists?: RawList[];
-  categories?: RawCategory;
-  location?: RawLocation | string;
-  workplaceType?: string;
-  isRemote?: boolean;
-  employmentType?: string;
-  salaryRange?: RawSalaryRange;
-  hostedUrl?: string;
-  absolute_url?: string;
-  jobUrl?: string;
-  publishedAt?: string;
-  createdAt?: string;
-  isListed?: boolean;
 }
 export function normalize(raw: RawPosting, source: (typeof sources)[number], time: string): Job {
   const rawLocation = raw.location;
   const locationText = typeof rawLocation === 'string' ? rawLocation : (rawLocation?.name ?? '');
   const location =
     source.type === 'lever'
-      ? (raw.categories?.allLocations ?? [raw.categories?.location]).join(' / ')
+      ? (raw.categories?.allLocations ?? [raw.categories?.location]).filter(Boolean).join(' / ')
       : source.type === 'greenhouse'
         ? locationText
         : locationText;
   const description = plain(
     source.type === 'lever'
-      ? [
-          raw.descriptionPlain,
-          ...(raw.lists ?? []).map((l: RawList) => l.text + '\n' + l.content),
-        ].join('\n')
+      ? [raw.descriptionPlain, ...(raw.lists ?? []).map((l) => l.text + '\n' + l.content)].join(
+          '\n',
+        )
       : source.type === 'greenhouse'
         ? raw.content
         : (raw.descriptionPlain ?? raw.descriptionHtml),
@@ -191,20 +238,47 @@ export function normalize(raw: RawPosting, source: (typeof sources)[number], tim
   let pay = compensation(description);
   if (raw.salaryRange) {
     const s = raw.salaryRange;
-    pay = {
-      min: typeof s.min === 'number' ? s.min : null,
-      max: typeof s.max === 'number' ? s.max : null,
-      currency: s.currency ?? null,
-      unit: /hour/i.test(s.interval ?? '')
-        ? 'hour'
-        : /year/i.test(s.interval ?? '')
-          ? 'year'
-          : null,
-      note: '공개 ATS 구조화 보수',
-    };
+    const min = typeof s.min === 'number' && Number.isFinite(s.min) && s.min >= 0 ? s.min : null;
+    const max = typeof s.max === 'number' && Number.isFinite(s.max) && s.max >= 0 ? s.max : null;
+    if ((min !== null || max !== null) && (min === null || max === null || min <= max)) {
+      const interval = s.interval ?? '';
+      pay = {
+        min,
+        max,
+        currency: /^[A-Z]{3}$/i.test(s.currency ?? '') ? s.currency!.toUpperCase() : null,
+        unit: /audio.{0,10}hour|finished hour/i.test(interval)
+          ? 'audio_hour'
+          : /audio.{0,10}minute/i.test(interval)
+            ? 'audio_minute'
+            : /hour/i.test(interval)
+              ? 'hour'
+              : /day|daily/i.test(interval)
+                ? 'day'
+                : /week/i.test(interval)
+                  ? 'week'
+                  : /month/i.test(interval)
+                    ? 'month'
+                    : /year|annual/i.test(interval)
+                      ? 'year'
+                      : /project/i.test(interval)
+                        ? 'project'
+                        : /task|job/i.test(interval)
+                          ? 'task'
+                          : null,
+        note: '공개 ATS 구조화 보수',
+      };
+    }
   }
-  const url = String(raw.hostedUrl ?? raw.absolute_url ?? raw.jobUrl ?? '');
-  const date = raw.publishedAt ?? (raw.createdAt ? new Date(raw.createdAt).toISOString() : null);
+  const url = String(raw.hostedUrl ?? raw.absolute_url ?? raw.jobUrl ?? '').trim();
+  const rawDate = raw.publishedAt ?? raw.createdAt;
+  const date =
+    rawDate !== undefined &&
+    rawDate !== null &&
+    Number.isFinite(typeof rawDate === 'number' ? rawDate : Date.parse(rawDate)) &&
+    Number.isFinite(new Date(rawDate).getTime())
+      ? new Date(rawDate).toISOString()
+      : null;
+  const officialAtsLink = isRecognizedAtsJobUrl(url, source.type);
   return {
     id: `${source.id}:${raw.id}`,
     title,
@@ -235,39 +309,54 @@ export function normalize(raw: RawPosting, source: (typeof sources)[number], tim
         ? '플랫폼 가입 모집'
         : '개별 공고',
     match: [],
-    sourceStatus: '공개 ATS 원문 조회 · 고용주 별도 교차검증 미완료',
+    sourceStatus: officialAtsLink
+      ? '공개 ATS 원문 조회 · 고용주 별도 교차검증 미완료'
+      : '공개 ATS 피드 제공 외부 지원 링크 · 외부 도메인 추가 검증 필요',
     platform: source.id === 'welo' ? 'welo' : source.id === 'mercor' ? 'mercor' : null,
+    safetySignals: detectSafetySignals(description),
   };
 }
 export async function fetchSource(
   source: (typeof sources)[number],
   env: Env,
 ): Promise<{ jobs: Job[]; report: SourceResult }> {
+  if (!isValidSourceUrl(source)) throw new Error('공식 ATS 출처 URL 검증 실패');
   const row = await env.DB.prepare('SELECT data, updated_at FROM source_cache WHERE source=?')
     .bind(source.id)
     .first<{ data: string; updated_at: string }>();
-  if (row && Date.now() - Date.parse(row.updated_at) < 900000)
-    return {
-      jobs: JSON.parse(row.data),
-      report: { source: source.name, count: 0, cached: true, checkedAt: row.updated_at },
-    };
+  if (row && Date.now() - Date.parse(row.updated_at) < 900000) {
+    try {
+      const cached = JSON.parse(row.data) as unknown;
+      if (
+        Array.isArray(cached) &&
+        cached.every((j) => j && typeof j === 'object' && typeof j.url === 'string')
+      ) {
+        return {
+          jobs: (cached as Job[]).filter((j) => isValidJobUrl(j.url, source.type)),
+          report: { source: source.name, count: 0, cached: true, checkedAt: row.updated_at },
+        };
+      }
+    } catch {
+      // A corrupt cache is not a successful source lookup; fetch the original feed.
+    }
+  }
   const r = await fetch(source.url, {
     signal: AbortSignal.timeout(25000),
     headers: { Accept: 'application/json' },
   });
   if (!r.ok) throw new Error(`출처 HTTP ${r.status}`);
+  if (r.url && new URL(r.url).origin !== new URL(source.url).origin)
+    throw new Error('ATS 출처가 다른 도메인으로 리디렉션됨');
   const text = await r.text();
   if (text.length > 20_000_000) throw new Error('공고 응답 크기 초과');
-  const json = JSON.parse(text) as unknown;
-  const input: unknown = Array.isArray(json) ? json : (json as { jobs?: unknown }).jobs;
-  const raw: RawPosting[] = Array.isArray(input) ? (input as RawPosting[]) : [];
-  if (!Array.isArray(input)) throw new Error('출처 형식 변경');
+  const input = parseAtsFeed(JSON.parse(text) as unknown, source.type);
   const time = new Date().toISOString();
-  const jobs = raw
+  const jobs = input
     .filter((r) => r.isListed !== false)
     .map((r) => normalize(r, source, time))
     .filter(
-      (j) => j.url.startsWith('https://') && (j.korea === 'confirmed' || /원격/.test(j.workMode)),
+      (j) =>
+        isValidJobUrl(j.url, source.type) && (j.korea === 'confirmed' || /원격/.test(j.workMode)),
     );
   await env.DB.prepare(
     'INSERT INTO source_cache(source,data,updated_at) VALUES(?,?,?) ON CONFLICT(source) DO UPDATE SET data=excluded.data,updated_at=excluded.updated_at',
@@ -277,15 +366,20 @@ export async function fetchSource(
   return { jobs, report: { source: source.name, count: 0, cached: false, checkedAt: time } };
 }
 export async function search(profile: Profile, env: Env): Promise<SearchResult> {
-  const keywords = profile.keywords
-    .map((k) => k.trim())
-    .filter((k) => k.length >= 2 && !/@|https?:|\d{7}/.test(k))
-    .slice(0, 20);
+  const keywords = [
+    ...new Set(
+      profile.keywords
+        .map((k) => k.trim())
+        .filter((k) => k.length >= 2 && !/@|https?:|\d{7}/.test(k))
+        .slice(0, 20),
+    ),
+  ];
   if (!keywords.length) throw new Error('검색 키워드를 하나 이상 입력하세요.');
   const result = await Promise.allSettled(sources.map((s) => fetchSource(s, env)));
   const reports: SourceResult[] = [],
     jobs: Job[] = [],
-    seen = new Set<string>();
+    seenUrls = new Set<string>(),
+    seenIds = new Set<string>();
   result.forEach((v, i) => {
     if (v.status === 'rejected') {
       reports.push({
@@ -300,63 +394,24 @@ export async function search(profile: Profile, env: Env): Promise<SearchResult> 
     let count = 0;
     for (const job of v.value.jobs) {
       if (!matchesPreferences(job, profile.preferences)) continue;
-      const namedLanguages = [
-        'Korean',
-        'English',
-        'Spanish',
-        'Arabic',
-        'French',
-        'German',
-        'Portuguese',
-        'Japanese',
-        'Chinese',
-        'Farsi',
-        'Malayalam',
-        'Hindi',
-        'Italian',
-        'Dutch',
-        'Russian',
-        'Thai',
-        'Vietnamese',
-        'Turkish',
-        'Indonesian',
-      ];
-      const required = namedLanguages.filter((l) => new RegExp(`\\b${l}\\b`, 'i').test(job.title));
-      if (
-        required.length &&
-        !required.some((l) =>
-          profile.languages.some((p) => p.toLowerCase().includes(l.toLowerCase())),
-        )
-      )
-        continue;
+      // Every explicitly named title language must be present in the profile.
+      // Matching Korean/한국어 aliases is handled by a single shared dictionary.
+      if (missingTitleLanguages(job.title, profile.languages).length) continue;
       const scored = scoreJob(profile, job);
-      const text = (job.title + ' ' + job.description).toLowerCase();
-      if (
-        (profile.negativeKeywords ?? []).some((k) =>
-          new RegExp(
-            `(^|[^a-z0-9])${k.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`,
-            'i',
-          ).test(text),
-        )
-      )
-        continue;
-      const match = keywords.filter((k) =>
-        new RegExp(
-          `(^|[^a-z0-9])${k.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`,
-          'i',
-        ).test(text),
-      );
+      const text = job.title + ' ' + job.description;
+      if ((profile.negativeKeywords ?? []).some((k) => matchesTextTerm(text, k))) continue;
+      const match = keywords.filter((k) => matchesSearchKeyword(text, k));
       if (!match.length || scored.matchScore < 25) continue;
       count++;
-      const canonical = new URL(job.url);
-      canonical.search = '';
-      if (!seen.has(canonical.href)) {
+      const canonical = canonicalJobUrl(job.url);
+      if (canonical && !seenUrls.has(canonical) && !seenIds.has(job.id)) {
         jobs.push({
           ...job,
-          match: scored.matchedEvidence.length ? scored.matchedEvidence : match,
+          match,
           ...scored,
         });
-        seen.add(canonical.href);
+        seenUrls.add(canonical);
+        seenIds.add(job.id);
       }
     }
     reports.push({ ...v.value.report, count });
