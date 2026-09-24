@@ -33,6 +33,16 @@ function leverPosting(id: string, title: string, url: string) {
   };
 }
 
+function greenhousePosting(id: number, content = '<p>Localization work</p>') {
+  return {
+    id,
+    title: `Localization Specialist ${id}`,
+    absolute_url: `https://www.coupang.jobs/en/jobs/?gh_jid=${id}`,
+    location: { name: 'Seoul, South Korea' },
+    content,
+  };
+}
+
 function envWithCache(): Env {
   const cache = new Map<string, { data: string; updated_at: string }>();
   return {
@@ -113,6 +123,85 @@ test('ATS feed validation binds each provider to its documented HTTPS endpoint',
     ),
     /검증 실패/,
   );
+});
+
+test('cache write failure does not turn a successful fresh ATS fetch into source failure', async () => {
+  const oldFetch = globalThis.fetch;
+  const stale = {
+    data: JSON.stringify([{ id: 'old', url: 'https://www.coupang.jobs/en/jobs/?gh_jid=1' }]),
+    updated_at: '2000-01-01T00:00:00.000Z',
+  };
+  const stored = stale;
+  let writes = 0;
+  const env = {
+    DB: {
+      prepare(statement: string) {
+        return {
+          bind() {
+            return {
+              async first() {
+                return statement.startsWith('SELECT') ? stored : null;
+              },
+              async run() {
+                writes++;
+                throw new Error('D1_ERROR: SQLITE_TOOBIG');
+              },
+            };
+          },
+        };
+      },
+    },
+  } as unknown as Env;
+  globalThis.fetch = async () => Response.json({ jobs: [greenhousePosting(8187545)] });
+  try {
+    const result = await fetchSource(sources[1], env);
+    assert.deepEqual(
+      result.jobs.map((job) => job.id),
+      ['coupang:8187545'],
+    );
+    assert.equal(result.report.cached, false);
+    assert.equal(result.report.checkedAt !== null, true);
+    assert.equal(result.report.error, undefined);
+    assert.equal(writes, 1);
+    assert.equal(stored, stale);
+  } finally {
+    globalThis.fetch = oldFetch;
+  }
+});
+
+test('oversized fresh result skips cache persistence but still returns all jobs', async () => {
+  const oldFetch = globalThis.fetch;
+  let writes = 0;
+  const env = {
+    DB: {
+      prepare(statement: string) {
+        return {
+          bind() {
+            return {
+              async first() {
+                return null;
+              },
+              async run() {
+                writes++;
+                assert.match(statement, /^INSERT INTO source_cache/);
+              },
+            };
+          },
+        };
+      },
+    },
+  } as unknown as Env;
+  const jobs = [{ ...greenhousePosting(9000000), id: 'x'.repeat(1_050_000) }];
+  globalThis.fetch = async () => Response.json({ jobs });
+  try {
+    const result = await fetchSource(sources[1], env);
+    assert.equal(result.jobs.length, jobs.length);
+    assert.equal(result.report.cached, false);
+    assert.equal(result.report.checkedAt !== null, true);
+    assert.equal(writes, 0);
+  } finally {
+    globalThis.fetch = oldFetch;
+  }
 });
 
 test('search applies Korean aliases, all required title languages, secure URLs and query-safe dedup', async () => {

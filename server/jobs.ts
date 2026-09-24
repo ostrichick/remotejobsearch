@@ -12,6 +12,8 @@ import { isValidSourceUrl, parseAtsFeed, sources, type RawPosting } from './ats'
 export { isValidSourceUrl, sources } from './ats';
 
 type Source = (typeof sources)[number];
+// Cache rows are optional; keep a conservative UTF-8 payload ceiling before D1 persistence.
+const MAX_SOURCE_CACHE_BYTES = 1_000_000;
 
 /** Keep ATS query identifiers; remove only parameters known to be acquisition tracking. */
 export function canonicalJobUrl(value: string): string | null {
@@ -358,11 +360,18 @@ export async function fetchSource(
       (j) =>
         isValidJobUrl(j.url, source.type) && (j.korea === 'confirmed' || /원격/.test(j.workMode)),
     );
-  await env.DB.prepare(
-    'INSERT INTO source_cache(source,data,updated_at) VALUES(?,?,?) ON CONFLICT(source) DO UPDATE SET data=excluded.data,updated_at=excluded.updated_at',
-  )
-    .bind(source.id, JSON.stringify(jobs), time)
-    .run();
+  try {
+    const cacheData = JSON.stringify(jobs);
+    if (new TextEncoder().encode(cacheData).byteLength <= MAX_SOURCE_CACHE_BYTES) {
+      await env.DB.prepare(
+        'INSERT INTO source_cache(source,data,updated_at) VALUES(?,?,?) ON CONFLICT(source) DO UPDATE SET data=excluded.data,updated_at=excluded.updated_at',
+      )
+        .bind(source.id, cacheData, time)
+        .run();
+    }
+  } catch {
+    // Cache persistence is best-effort; a successful fresh ATS fetch must still be usable.
+  }
   return { jobs, report: { source: source.name, count: 0, cached: false, checkedAt: time } };
 }
 export async function search(profile: Profile, env: Env): Promise<SearchResult> {
