@@ -219,6 +219,11 @@ test('search applies Korean aliases, all required title languages, secure URLs a
     ),
     leverPosting('b', 'Korean AI Annotator', 'https://jobs.lever.co/weloglobal/role?postingId=B'),
     leverPosting('en', 'Korean English AI Annotator', 'https://jobs.lever.co/weloglobal/en'),
+    leverPosting(
+      'no',
+      'AI Trainers Network - Norwegian',
+      'https://jobs.lever.co/weloglobal/norwegian',
+    ),
     leverPosting('bad', 'Korean AI Annotator', 'https://jobs.lever.co.evil.com/weloglobal/bad'),
   ];
   globalThis.fetch = async (input) =>

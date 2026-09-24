@@ -72,6 +72,23 @@ test('English and Korean language labels are grouped across both writing systems
   assert.equal(matchesSearchKeyword('Korean tutor', 'evaluation'), false);
 });
 
+test('title language requirements include common European languages outside the original profile set', () => {
+  assert.deepEqual(titleLanguages('AI Trainers Network - Norwegian'), ['Norwegian']);
+  assert.deepEqual(
+    missingTitleLanguages('Norwegian Linguist Reviewer', ['Korean', 'English', 'Spanish']),
+    ['Norwegian'],
+  );
+  assert.deepEqual(
+    missingTitleLanguages('Swedish Language Expert', ['한국어', '영어', '스페인어']),
+    ['Swedish'],
+  );
+  assert.deepEqual(
+    missingTitleLanguages('Shape the Future of AI — Ilocano Talent Hub', ['English']),
+    ['Ilocano'],
+  );
+  assert.deepEqual(missingTitleLanguages('Spanish AI Evaluator', ['Spanish']), []);
+});
+
 test('title-role match outranks body-only boilerplate and does not misstate missing eligibility', () => {
   const p = { ...profile, primaryRoleKeywords: ['annotation'] };
   const title = scoreJob(p, {
