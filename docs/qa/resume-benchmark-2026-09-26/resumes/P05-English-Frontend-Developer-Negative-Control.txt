@@ -1,0 +1,18 @@
+Alex Morgan
+Frontend Developer
+
+SUMMARY
+Frontend engineer building accessible web applications and design systems.
+
+LANGUAGES
+English - Native
+
+SKILLS
+JavaScript, TypeScript, React, AWS, design
+
+EXPERIENCE
+2023 - 2026 Frontend Developer: built React and TypeScript applications, component libraries, and web performance tooling.
+2021 - 2023 Web Developer: maintained JavaScript frontends and AWS-hosted applications.
+
+EDUCATION
+Bachelor degree in Computer Science, City University, 2021

@@ -1,0 +1,18 @@
+Daniel Lee
+Data Annotator & Quality Reviewer
+
+SUMMARY
+Data annotation specialist experienced with text, image, and audio labeling, quality assurance, structured guidelines, and error analysis.
+
+LANGUAGES
+English - Native
+
+SKILLS
+annotation, evaluation, QA, data analysis, Python, Excel
+
+EXPERIENCE
+2024 - 2026 Data Annotator: labeled text and image datasets and completed second-pass QA reviews.
+2022 - 2024 Data Quality Assistant: used Excel and Python for data analysis, validation, and reporting.
+
+EDUCATION
+Bachelor degree in Information Systems, State University, 2022

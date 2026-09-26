@@ -1,0 +1,19 @@
+Minseo Kim
+Data Analyst
+
+SUMMARY
+Data analyst with experience in SQL reporting, Python automation, dashboard analysis, and business metrics.
+
+LANGUAGES
+Korean - Native
+English - Professional
+
+SKILLS
+data analysis, Python, SQL, Excel, AWS
+
+EXPERIENCE
+2023 - 2026 Data Analyst: built SQL reports, automated data cleaning with Python, and analyzed product metrics.
+2021 - 2023 Reporting Analyst: maintained Excel dashboards and validated business data.
+
+EDUCATION
+Bachelor degree in Statistics, Korea Open University, 2021

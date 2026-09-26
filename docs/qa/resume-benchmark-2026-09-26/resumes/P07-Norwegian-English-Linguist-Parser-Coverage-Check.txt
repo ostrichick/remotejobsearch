@@ -1,0 +1,19 @@
+Ingrid Solberg
+Norwegian-English Linguist & AI Evaluator
+
+SUMMARY
+Bilingual language specialist with experience in Norwegian and English AI evaluation, translation, transcription, and linguistic QA.
+
+LANGUAGES
+Norwegian - Native
+English - Fluent
+
+SKILLS
+linguistic, translation, localization, transcription, evaluation, QA
+
+EXPERIENCE
+2023 - 2026 AI Language Evaluator: evaluated Norwegian and English model responses for relevance, fluency, and instruction following.
+2020 - 2023 Translator: translated Norwegian and English documents and reviewed machine translation output.
+
+EDUCATION
+Master degree in Linguistics, Nordic Language University, 2020

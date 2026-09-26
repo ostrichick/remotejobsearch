@@ -1,0 +1,1334 @@
+{
+  "generatedAt": "2026-09-26T13:16:06.489Z",
+  "commit": "45ed9f6c017f41fff11ad70f6c20a5595e8d3b6d",
+  "mode": "isolated local Sites dev UI + live ATS feeds",
+  "personas": [
+    {
+      "id": "P01",
+      "name": "Korean-English-Spanish AI Evaluator",
+      "expectedLanguages": ["Korean", "English", "Spanish"],
+      "extractedProfile": {
+        "skills": [
+          "annotation",
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation",
+          "QA",
+          "Excel",
+          "Google Workspace"
+        ],
+        "languages": ["Korean", "English", "Spanish"],
+        "keywords": [
+          "annotation",
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation",
+          "QA",
+          "Excel",
+          "Google Workspace"
+        ],
+        "primaryRoleKeywords": [
+          "annotation",
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation"
+        ],
+        "skillKeywords": ["QA", "Excel", "Google Workspace"],
+        "languageKeywords": ["Korean", "English", "Spanish"]
+      },
+      "missingExpectedLanguages": [],
+      "resultCount": 150,
+      "visibleRowCount": 89,
+      "scoreLabelCounts": {
+        "high": 9,
+        "medium": 80,
+        "low": 61
+      },
+      "firstTargetRank": 1,
+      "firstVisibleTargetRank": 1,
+      "specialtyLanguageRanks": {
+        "Korean": {
+          "all": 9,
+          "visible": 9
+        },
+        "Spanish": {
+          "all": 19,
+          "visible": 19
+        }
+      },
+      "languageViolationCount": 0,
+      "languageViolations": [],
+      "top10RoleHitCount": 10,
+      "top10RoleHitRate": 1,
+      "top10": [
+        {
+          "id": "welo:76e03d86-bd9f-4bdd-8eca-69d2ec340344",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (United States)",
+          "company": "Welo Global",
+          "score": 75,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:10:21.692Z"
+        },
+        {
+          "id": "welo:3b07a9ab-dde4-4d79-876e-226ba4762b06",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (United Kingdom)",
+          "company": "Welo Global",
+          "score": 75,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "United Kingdom",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:06:51.821Z"
+        },
+        {
+          "id": "welo:b8eef97e-87fa-4c83-8646-41520a68f5c2",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (New Zealand)",
+          "company": "Welo Global",
+          "score": 75,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "New Zealand",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:05:16.865Z"
+        },
+        {
+          "id": "welo:0af74a33-aa2e-4666-804f-4edb85241d37",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Ireland)",
+          "company": "Welo Global",
+          "score": 75,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Ireland",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:04:02.529Z"
+        },
+        {
+          "id": "welo:27cebfd4-0dc2-447c-8a04-0d0a1870a1af",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Canada)",
+          "company": "Welo Global",
+          "score": 75,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Canada",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:02:37.247Z"
+        },
+        {
+          "id": "welo:9bc6f0f1-a49d-4600-83bc-0b751013e276",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Australia)",
+          "company": "Welo Global",
+          "score": 75,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Australia",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:58:03.593Z"
+        },
+        {
+          "id": "welo:d57dcf1b-039a-4ed3-b683-3c0cb60e7e25",
+          "title": "Non-Linguistic Quality Control Specialists (Europe)",
+          "company": "Welo Global",
+          "score": 75,
+          "label": "high",
+          "match": ["linguistic", "localization", "translation", "QA"],
+          "location": "Remote - Europe",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-08-06T10:45:11.523Z"
+        },
+        {
+          "id": "welo:96c5eb55-c078-418c-812c-04254b06ff44",
+          "title": "Non-Linguistic Quality Control Specialists (US)",
+          "company": "Welo Global",
+          "score": 75,
+          "label": "high",
+          "match": ["linguistic", "localization", "translation", "QA"],
+          "location": "Remote / Remote, Worldwide",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-08-06T10:40:44.331Z"
+        },
+        {
+          "id": "welo:40f3e59d-35fc-4431-8fad-d5b97900b962",
+          "title": "Ads Quality Rater - Korean [Remote & Online]",
+          "company": "Welo Global",
+          "score": 70,
+          "label": "high",
+          "match": ["annotation", "evaluation"],
+          "location": "South Korea",
+          "korea": "confirmed",
+          "source": "Welo Global · Lever",
+          "postedAt": "2022-02-08T02:14:50.585Z"
+        },
+        {
+          "id": "welo:444db572-9d62-49b4-a128-9988df73f571",
+          "title": "Andromeda Sadiradra - Audio Rater - Generalist - English (United State)",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["evaluation"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:53:52.057Z"
+        }
+      ],
+      "sources": [
+        {
+          "source": "Welo Global · Lever",
+          "count": 87,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:13.410Z"
+        },
+        {
+          "source": "Coupang · Greenhouse",
+          "count": 65,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:09.368Z"
+        },
+        {
+          "source": "Mercor · Ashby",
+          "count": 1,
+          "cached": true,
+          "error": null,
+          "checkedAt": "2026-09-26T13:11:29.995Z"
+        }
+      ],
+      "screenshot": "screenshots/P01.png"
+    },
+    {
+      "id": "P02",
+      "name": "Spanish-English Translator & Localization QA",
+      "expectedLanguages": ["Spanish", "English"],
+      "extractedProfile": {
+        "skills": [
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation",
+          "QA",
+          "Excel"
+        ],
+        "languages": ["English", "Spanish"],
+        "keywords": [
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation",
+          "QA",
+          "Excel"
+        ],
+        "primaryRoleKeywords": [
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation"
+        ],
+        "skillKeywords": ["QA", "Excel"],
+        "languageKeywords": ["English", "Spanish"]
+      },
+      "missingExpectedLanguages": [],
+      "resultCount": 150,
+      "visibleRowCount": 72,
+      "scoreLabelCounts": {
+        "high": 8,
+        "medium": 64,
+        "low": 78
+      },
+      "firstTargetRank": 17,
+      "firstVisibleTargetRank": 17,
+      "specialtyLanguageRanks": {
+        "Spanish": {
+          "all": 17,
+          "visible": 17
+        }
+      },
+      "languageViolationCount": 0,
+      "languageViolations": [],
+      "top10RoleHitCount": 10,
+      "top10RoleHitRate": 1,
+      "top10": [
+        {
+          "id": "welo:76e03d86-bd9f-4bdd-8eca-69d2ec340344",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (United States)",
+          "company": "Welo Global",
+          "score": 80,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:10:21.692Z"
+        },
+        {
+          "id": "welo:3b07a9ab-dde4-4d79-876e-226ba4762b06",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (United Kingdom)",
+          "company": "Welo Global",
+          "score": 80,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "United Kingdom",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:06:51.821Z"
+        },
+        {
+          "id": "welo:b8eef97e-87fa-4c83-8646-41520a68f5c2",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (New Zealand)",
+          "company": "Welo Global",
+          "score": 80,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "New Zealand",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:05:16.865Z"
+        },
+        {
+          "id": "welo:0af74a33-aa2e-4666-804f-4edb85241d37",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Ireland)",
+          "company": "Welo Global",
+          "score": 80,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Ireland",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:04:02.529Z"
+        },
+        {
+          "id": "welo:27cebfd4-0dc2-447c-8a04-0d0a1870a1af",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Canada)",
+          "company": "Welo Global",
+          "score": 80,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Canada",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:02:37.247Z"
+        },
+        {
+          "id": "welo:9bc6f0f1-a49d-4600-83bc-0b751013e276",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Australia)",
+          "company": "Welo Global",
+          "score": 80,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Australia",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:58:03.593Z"
+        },
+        {
+          "id": "welo:d57dcf1b-039a-4ed3-b683-3c0cb60e7e25",
+          "title": "Non-Linguistic Quality Control Specialists (Europe)",
+          "company": "Welo Global",
+          "score": 80,
+          "label": "high",
+          "match": ["linguistic", "localization", "translation", "QA"],
+          "location": "Remote - Europe",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-08-06T10:45:11.523Z"
+        },
+        {
+          "id": "welo:96c5eb55-c078-418c-812c-04254b06ff44",
+          "title": "Non-Linguistic Quality Control Specialists (US)",
+          "company": "Welo Global",
+          "score": 80,
+          "label": "high",
+          "match": ["linguistic", "localization", "translation", "QA"],
+          "location": "Remote / Remote, Worldwide",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-08-06T10:40:44.331Z"
+        },
+        {
+          "id": "welo:444db572-9d62-49b4-a128-9988df73f571",
+          "title": "Andromeda Sadiradra - Audio Rater - Generalist - English (United State)",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["evaluation"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:53:52.057Z"
+        },
+        {
+          "id": "welo:a359138d-45e6-4e40-8818-9ea8c05c516f",
+          "title": "Andromeda Sadiradra - Audio Rater - Generalist - English (United Kingdom)",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["evaluation"],
+          "location": "United Kingdom",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:45:03.048Z"
+        }
+      ],
+      "sources": [
+        {
+          "source": "Welo Global · Lever",
+          "count": 79,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:21.658Z"
+        },
+        {
+          "source": "Coupang · Greenhouse",
+          "count": 72,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:18.012Z"
+        },
+        {
+          "source": "Mercor · Ashby",
+          "count": 1,
+          "cached": true,
+          "error": null,
+          "checkedAt": "2026-09-26T13:11:29.995Z"
+        }
+      ],
+      "screenshot": "screenshots/P02.png"
+    },
+    {
+      "id": "P03",
+      "name": "English Data Annotator",
+      "expectedLanguages": ["English"],
+      "extractedProfile": {
+        "skills": ["annotation", "evaluation", "QA", "data analysis", "Python", "Excel"],
+        "languages": ["English"],
+        "keywords": ["annotation", "evaluation", "QA", "data analysis", "Python", "Excel"],
+        "primaryRoleKeywords": ["annotation", "evaluation"],
+        "skillKeywords": ["QA", "data analysis", "Python", "Excel"],
+        "languageKeywords": ["English"]
+      },
+      "missingExpectedLanguages": [],
+      "resultCount": 150,
+      "visibleRowCount": 44,
+      "scoreLabelCounts": {
+        "high": 6,
+        "medium": 38,
+        "low": 106
+      },
+      "firstTargetRank": 1,
+      "firstVisibleTargetRank": 1,
+      "specialtyLanguageRanks": {},
+      "languageViolationCount": 0,
+      "languageViolations": [],
+      "top10RoleHitCount": 10,
+      "top10RoleHitRate": 1,
+      "top10": [
+        {
+          "id": "welo:76e03d86-bd9f-4bdd-8eca-69d2ec340344",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (United States)",
+          "company": "Welo Global",
+          "score": 73,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:10:21.692Z"
+        },
+        {
+          "id": "welo:3b07a9ab-dde4-4d79-876e-226ba4762b06",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (United Kingdom)",
+          "company": "Welo Global",
+          "score": 73,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "United Kingdom",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:06:51.821Z"
+        },
+        {
+          "id": "welo:b8eef97e-87fa-4c83-8646-41520a68f5c2",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (New Zealand)",
+          "company": "Welo Global",
+          "score": 73,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "New Zealand",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:05:16.865Z"
+        },
+        {
+          "id": "welo:0af74a33-aa2e-4666-804f-4edb85241d37",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Ireland)",
+          "company": "Welo Global",
+          "score": 73,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Ireland",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:04:02.529Z"
+        },
+        {
+          "id": "welo:27cebfd4-0dc2-447c-8a04-0d0a1870a1af",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Canada)",
+          "company": "Welo Global",
+          "score": 73,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Canada",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:02:37.247Z"
+        },
+        {
+          "id": "welo:9bc6f0f1-a49d-4600-83bc-0b751013e276",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Australia)",
+          "company": "Welo Global",
+          "score": 73,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Australia",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:58:03.593Z"
+        },
+        {
+          "id": "welo:c5c69abd-d960-42d6-ba72-0cba79615418",
+          "title": "Project Cursa - Robot Manipulation Video Annotator",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["annotation"],
+          "location": "Philippines",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-08-21T06:44:46.074Z"
+        },
+        {
+          "id": "welo:6d382ac1-ef06-4e38-8862-1b824ba34ff9",
+          "title": "Maps Personalization Relevance Rater - English (Australia)",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["evaluation"],
+          "location": "Australia",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-07-09T03:12:47.573Z"
+        },
+        {
+          "id": "welo:7b07afde-d586-4945-9ef8-b41ca36a739b",
+          "title": "Maps Personalization Relevance Rater - English (Canada)",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["evaluation"],
+          "location": "Canada",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-07-09T02:08:09.897Z"
+        },
+        {
+          "id": "welo:cafd4b51-61bd-4b57-a6b2-49c8d08c05e2",
+          "title": "Maps Visual Design Relevance Evaluator - English (US)",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["evaluation"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-04-27T09:08:58.585Z"
+        }
+      ],
+      "sources": [
+        {
+          "source": "Welo Global · Lever",
+          "count": 56,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:30.631Z"
+        },
+        {
+          "source": "Coupang · Greenhouse",
+          "count": 122,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:25.571Z"
+        },
+        {
+          "source": "Mercor · Ashby",
+          "count": 1,
+          "cached": true,
+          "error": null,
+          "checkedAt": "2026-09-26T13:11:29.995Z"
+        }
+      ],
+      "screenshot": "screenshots/P03.png"
+    },
+    {
+      "id": "P04",
+      "name": "Korean-English Data Analyst",
+      "expectedLanguages": ["Korean", "English"],
+      "extractedProfile": {
+        "skills": ["data analysis", "Python", "SQL", "AWS", "Excel"],
+        "languages": ["Korean", "English"],
+        "keywords": ["data analysis", "Python", "SQL", "AWS", "Excel"],
+        "primaryRoleKeywords": [],
+        "skillKeywords": ["data analysis", "Python", "SQL", "AWS", "Excel"],
+        "languageKeywords": ["Korean", "English"]
+      },
+      "missingExpectedLanguages": [],
+      "resultCount": 150,
+      "visibleRowCount": 0,
+      "scoreLabelCounts": {
+        "low": 150
+      },
+      "firstTargetRank": 1,
+      "firstVisibleTargetRank": null,
+      "specialtyLanguageRanks": {},
+      "languageViolationCount": 0,
+      "languageViolations": [],
+      "top10RoleHitCount": 1,
+      "top10RoleHitRate": 0.1,
+      "top10": [
+        {
+          "id": "welo:7f8825ef-9120-4a08-bf31-3564794309b3",
+          "title": "Senior Data Analyst",
+          "company": "Welo Global",
+          "score": 44,
+          "label": "low",
+          "match": ["Python", "SQL", "Excel"],
+          "location": "Mexico",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-03T04:53:21.881Z"
+        },
+        {
+          "id": "welo:5fcbfe45-e8b9-4ee1-9a7e-eb1df10dee33",
+          "title": "Project Lion - Prompt Engineer - United States (Remote, Part-Time)",
+          "company": "Welo Global",
+          "score": 44,
+          "label": "low",
+          "match": ["data analysis", "SQL"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-03-18T01:56:21.773Z"
+        },
+        {
+          "id": "welo:2dedf12e-fcab-41e3-b9d3-3d197246c908",
+          "title": "Project Lion - Senior Prompt Engineer - Portugal (Remote, Part-Time)",
+          "company": "Welo Global",
+          "score": 44,
+          "label": "low",
+          "match": ["data analysis", "SQL"],
+          "location": "Porto, Portugal",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-03-16T07:32:37.241Z"
+        },
+        {
+          "id": "welo:5a1e8e5d-5169-4cf6-8642-3cf5a973c509",
+          "title": "Project Lion - Senior Prompt Engineer - Netherland (Remote, Part-Time)",
+          "company": "Welo Global",
+          "score": 44,
+          "label": "low",
+          "match": ["data analysis", "SQL"],
+          "location": "Netherlands",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-03-16T07:30:43.149Z"
+        },
+        {
+          "id": "welo:85827e35-320c-4d45-8300-6f7b1b2561dc",
+          "title": "Project Lion - Senior Prompt Engineer - Japan (Remote, Part-Time)",
+          "company": "Welo Global",
+          "score": 44,
+          "label": "low",
+          "match": ["data analysis", "SQL"],
+          "location": "Japan",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-03-16T07:28:58.145Z"
+        },
+        {
+          "id": "welo:0b0c69d8-223f-4b6c-ace7-c8d69b668780",
+          "title": "Project Lion - Senior Prompt Engineer - Italy (Remote, Part-Time)",
+          "company": "Welo Global",
+          "score": 44,
+          "label": "low",
+          "match": ["data analysis", "SQL"],
+          "location": "Italy",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-03-16T07:26:54.598Z"
+        },
+        {
+          "id": "welo:bc3b940e-1ac4-4a45-8507-24826a45bdeb",
+          "title": "Project Lion - Senior Prompt Engineer - Spain (Remote, Part-Time)",
+          "company": "Welo Global",
+          "score": 44,
+          "label": "low",
+          "match": ["data analysis", "SQL"],
+          "location": "Spain",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-03-16T07:24:55.118Z"
+        },
+        {
+          "id": "welo:bd62b741-47cc-4363-9bb5-170253f53187",
+          "title": "Project Lion - Senior Prompt Engineer - France (Remote, Part-Time)",
+          "company": "Welo Global",
+          "score": 44,
+          "label": "low",
+          "match": ["data analysis", "SQL"],
+          "location": "France",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-03-16T07:23:31.472Z"
+        },
+        {
+          "id": "welo:1c6f0ff2-101f-4a14-b394-29f22eeb4e32",
+          "title": "Project Lion - Senior Prompt Engineer - Germany (Remote, Part-Time)",
+          "company": "Welo Global",
+          "score": 44,
+          "label": "low",
+          "match": ["data analysis", "SQL"],
+          "location": "Germany",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-03-16T07:18:59.911Z"
+        },
+        {
+          "id": "welo:23ae2577-3a30-406f-8c67-036e02ad758e",
+          "title": "Project Lion - Lead Prompt Engineer - United States (Remote, Part-Time)",
+          "company": "Welo Global",
+          "score": 44,
+          "label": "low",
+          "match": ["data analysis", "SQL"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-03-16T07:03:58.746Z"
+        }
+      ],
+      "sources": [
+        {
+          "source": "Welo Global · Lever",
+          "count": 12,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:39.488Z"
+        },
+        {
+          "source": "Coupang · Greenhouse",
+          "count": 151,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:34.313Z"
+        },
+        {
+          "source": "Mercor · Ashby",
+          "count": 0,
+          "cached": true,
+          "error": null,
+          "checkedAt": "2026-09-26T13:11:29.995Z"
+        }
+      ],
+      "screenshot": "screenshots/P04.png"
+    },
+    {
+      "id": "P05",
+      "name": "English Frontend Developer Negative Control",
+      "expectedLanguages": ["English"],
+      "extractedProfile": {
+        "skills": ["JavaScript", "TypeScript", "React", "AWS", "design"],
+        "languages": ["English"],
+        "keywords": ["JavaScript", "TypeScript", "React", "AWS", "design"],
+        "primaryRoleKeywords": [],
+        "skillKeywords": ["JavaScript", "TypeScript", "React", "AWS", "design"],
+        "languageKeywords": ["English"]
+      },
+      "missingExpectedLanguages": [],
+      "resultCount": 95,
+      "visibleRowCount": 0,
+      "scoreLabelCounts": {
+        "low": 95
+      },
+      "firstTargetRank": 19,
+      "firstVisibleTargetRank": null,
+      "specialtyLanguageRanks": {},
+      "languageViolationCount": 0,
+      "languageViolations": [],
+      "top10RoleHitCount": 9,
+      "top10RoleHitRate": 0.9,
+      "top10": [
+        {
+          "id": "coupang:8127212",
+          "title": "[쿠팡페이] Senior Back-end Engineer (계약직)",
+          "company": "Coupang",
+          "score": 44,
+          "label": "low",
+          "match": ["JavaScript", "TypeScript"],
+          "location": "Seoul, South Korea",
+          "korea": "confirmed",
+          "source": "Coupang · Greenhouse",
+          "postedAt": null
+        },
+        {
+          "id": "coupang:8107804",
+          "title": "Senior Back-end Engineer (Cloud Infrastructure Automation)",
+          "company": "Coupang",
+          "score": 44,
+          "label": "low",
+          "match": ["AWS", "design"],
+          "location": "Seoul, South Korea",
+          "korea": "confirmed",
+          "source": "Coupang · Greenhouse",
+          "postedAt": null
+        },
+        {
+          "id": "coupang:8186132",
+          "title": "Senior, Back-end Engineer(CX) - Coupang Play ",
+          "company": "Coupang",
+          "score": 44,
+          "label": "low",
+          "match": ["JavaScript", "AWS"],
+          "location": "Seoul, South Korea",
+          "korea": "confirmed",
+          "source": "Coupang · Greenhouse",
+          "postedAt": null
+        },
+        {
+          "id": "coupang:8107806",
+          "title": "Senior Backend Engineer (Eats Merchant)",
+          "company": "Coupang",
+          "score": 44,
+          "label": "low",
+          "match": ["AWS", "design"],
+          "location": "Seoul, South Korea",
+          "korea": "confirmed",
+          "source": "Coupang · Greenhouse",
+          "postedAt": null
+        },
+        {
+          "id": "coupang:8129468",
+          "title": "Senior Back End Engineer (Global Mobility & Business Travel)",
+          "company": "Coupang",
+          "score": 44,
+          "label": "low",
+          "match": ["AWS", "design"],
+          "location": "Seoul, South Korea",
+          "korea": "confirmed",
+          "source": "Coupang · Greenhouse",
+          "postedAt": null
+        },
+        {
+          "id": "coupang:8203405",
+          "title": "Senior, Network Security Engineer (Detection Operations)",
+          "company": "Coupang",
+          "score": 44,
+          "label": "low",
+          "match": ["JavaScript", "AWS"],
+          "location": "Seoul, South Korea",
+          "korea": "confirmed",
+          "source": "Coupang · Greenhouse",
+          "postedAt": null
+        },
+        {
+          "id": "coupang:7936538",
+          "title": "Sr. Staff Back-end Engineer (Coupang Pay)",
+          "company": "Coupang",
+          "score": 44,
+          "label": "low",
+          "match": ["JavaScript", "TypeScript", "design"],
+          "location": "Seoul, South Korea",
+          "korea": "confirmed",
+          "source": "Coupang · Greenhouse",
+          "postedAt": null
+        },
+        {
+          "id": "coupang:8224844",
+          "title": "Staff, AI Security Architect",
+          "company": "Coupang",
+          "score": 44,
+          "label": "low",
+          "match": ["AWS", "design"],
+          "location": "Seoul, South Korea",
+          "korea": "confirmed",
+          "source": "Coupang · Greenhouse",
+          "postedAt": null
+        },
+        {
+          "id": "coupang:8212612",
+          "title": "Staff Back-end Engineer (Security Service Engineering)",
+          "company": "Coupang",
+          "score": 44,
+          "label": "low",
+          "match": ["AWS", "design"],
+          "location": "Seoul, South Korea",
+          "korea": "confirmed",
+          "source": "Coupang · Greenhouse",
+          "postedAt": null
+        },
+        {
+          "id": "coupang:8025149",
+          "title": "Staff Database Engineer (Customer Success)",
+          "company": "Coupang",
+          "score": 44,
+          "label": "low",
+          "match": ["AWS", "design"],
+          "location": "Seoul, South Korea",
+          "korea": "confirmed",
+          "source": "Coupang · Greenhouse",
+          "postedAt": null
+        }
+      ],
+      "sources": [
+        {
+          "source": "Welo Global · Lever",
+          "count": 5,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:47.452Z"
+        },
+        {
+          "source": "Coupang · Greenhouse",
+          "count": 90,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:43.480Z"
+        },
+        {
+          "source": "Mercor · Ashby",
+          "count": 0,
+          "cached": true,
+          "error": null,
+          "checkedAt": "2026-09-26T13:11:29.995Z"
+        }
+      ],
+      "screenshot": "screenshots/P05.png"
+    },
+    {
+      "id": "P06",
+      "name": "French-English Linguist Positive Control",
+      "expectedLanguages": ["French", "English"],
+      "extractedProfile": {
+        "skills": [
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation",
+          "QA"
+        ],
+        "languages": ["English", "French"],
+        "keywords": [
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation",
+          "QA"
+        ],
+        "primaryRoleKeywords": [
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation"
+        ],
+        "skillKeywords": ["QA"],
+        "languageKeywords": ["English", "French"]
+      },
+      "missingExpectedLanguages": [],
+      "resultCount": 130,
+      "visibleRowCount": 74,
+      "scoreLabelCounts": {
+        "high": 8,
+        "medium": 66,
+        "low": 56
+      },
+      "firstTargetRank": 15,
+      "firstVisibleTargetRank": 15,
+      "specialtyLanguageRanks": {
+        "French": {
+          "all": 15,
+          "visible": 15
+        }
+      },
+      "languageViolationCount": 0,
+      "languageViolations": [],
+      "top10RoleHitCount": 10,
+      "top10RoleHitRate": 1,
+      "top10": [
+        {
+          "id": "welo:76e03d86-bd9f-4bdd-8eca-69d2ec340344",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (United States)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:10:21.692Z"
+        },
+        {
+          "id": "welo:3b07a9ab-dde4-4d79-876e-226ba4762b06",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (United Kingdom)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "United Kingdom",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:06:51.821Z"
+        },
+        {
+          "id": "welo:b8eef97e-87fa-4c83-8646-41520a68f5c2",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (New Zealand)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "New Zealand",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:05:16.865Z"
+        },
+        {
+          "id": "welo:0af74a33-aa2e-4666-804f-4edb85241d37",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Ireland)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Ireland",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:04:02.529Z"
+        },
+        {
+          "id": "welo:27cebfd4-0dc2-447c-8a04-0d0a1870a1af",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Canada)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Canada",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:02:37.247Z"
+        },
+        {
+          "id": "welo:9bc6f0f1-a49d-4600-83bc-0b751013e276",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Australia)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Australia",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:58:03.593Z"
+        },
+        {
+          "id": "welo:d57dcf1b-039a-4ed3-b683-3c0cb60e7e25",
+          "title": "Non-Linguistic Quality Control Specialists (Europe)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["linguistic", "localization", "translation", "QA"],
+          "location": "Remote - Europe",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-08-06T10:45:11.523Z"
+        },
+        {
+          "id": "welo:96c5eb55-c078-418c-812c-04254b06ff44",
+          "title": "Non-Linguistic Quality Control Specialists (US)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["linguistic", "localization", "translation", "QA"],
+          "location": "Remote / Remote, Worldwide",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-08-06T10:40:44.331Z"
+        },
+        {
+          "id": "welo:444db572-9d62-49b4-a128-9988df73f571",
+          "title": "Andromeda Sadiradra - Audio Rater - Generalist - English (United State)",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["evaluation"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:53:52.057Z"
+        },
+        {
+          "id": "welo:a359138d-45e6-4e40-8818-9ea8c05c516f",
+          "title": "Andromeda Sadiradra - Audio Rater - Generalist - English (United Kingdom)",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["evaluation"],
+          "location": "United Kingdom",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:45:03.048Z"
+        }
+      ],
+      "sources": [
+        {
+          "source": "Welo Global · Lever",
+          "count": 78,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:56.716Z"
+        },
+        {
+          "source": "Coupang · Greenhouse",
+          "count": 51,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:15:50.820Z"
+        },
+        {
+          "source": "Mercor · Ashby",
+          "count": 1,
+          "cached": true,
+          "error": null,
+          "checkedAt": "2026-09-26T13:11:29.995Z"
+        }
+      ],
+      "screenshot": "screenshots/P06.png"
+    },
+    {
+      "id": "P07",
+      "name": "Norwegian-English Linguist Parser Coverage Check",
+      "expectedLanguages": ["Norwegian", "English"],
+      "extractedProfile": {
+        "skills": [
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation",
+          "QA"
+        ],
+        "languages": ["English"],
+        "keywords": [
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation",
+          "QA"
+        ],
+        "primaryRoleKeywords": [
+          "evaluation",
+          "transcription",
+          "linguistic",
+          "localization",
+          "translation"
+        ],
+        "skillKeywords": ["QA"],
+        "languageKeywords": ["English"]
+      },
+      "missingExpectedLanguages": ["Norwegian"],
+      "resultCount": 116,
+      "visibleRowCount": 59,
+      "scoreLabelCounts": {
+        "high": 8,
+        "medium": 51,
+        "low": 57
+      },
+      "firstTargetRank": 22,
+      "firstVisibleTargetRank": 22,
+      "specialtyLanguageRanks": {
+        "Norwegian": {
+          "all": null,
+          "visible": null
+        }
+      },
+      "languageViolationCount": 0,
+      "languageViolations": [],
+      "top10RoleHitCount": 10,
+      "top10RoleHitRate": 1,
+      "top10": [
+        {
+          "id": "welo:76e03d86-bd9f-4bdd-8eca-69d2ec340344",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (United States)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:10:21.692Z"
+        },
+        {
+          "id": "welo:3b07a9ab-dde4-4d79-876e-226ba4762b06",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (United Kingdom)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "United Kingdom",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:06:51.821Z"
+        },
+        {
+          "id": "welo:b8eef97e-87fa-4c83-8646-41520a68f5c2",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (New Zealand)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "New Zealand",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:05:16.865Z"
+        },
+        {
+          "id": "welo:0af74a33-aa2e-4666-804f-4edb85241d37",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Ireland)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Ireland",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:04:02.529Z"
+        },
+        {
+          "id": "welo:27cebfd4-0dc2-447c-8a04-0d0a1870a1af",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Canada)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Canada",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T11:02:37.247Z"
+        },
+        {
+          "id": "welo:9bc6f0f1-a49d-4600-83bc-0b751013e276",
+          "title": "Andromeda Sadiradra - QA Audio Rater - English (Australia)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["evaluation", "QA"],
+          "location": "Australia",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:58:03.593Z"
+        },
+        {
+          "id": "welo:d57dcf1b-039a-4ed3-b683-3c0cb60e7e25",
+          "title": "Non-Linguistic Quality Control Specialists (Europe)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["linguistic", "localization", "translation", "QA"],
+          "location": "Remote - Europe",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-08-06T10:45:11.523Z"
+        },
+        {
+          "id": "welo:96c5eb55-c078-418c-812c-04254b06ff44",
+          "title": "Non-Linguistic Quality Control Specialists (US)",
+          "company": "Welo Global",
+          "score": 95,
+          "label": "high",
+          "match": ["linguistic", "localization", "translation", "QA"],
+          "location": "Remote / Remote, Worldwide",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-08-06T10:40:44.331Z"
+        },
+        {
+          "id": "welo:444db572-9d62-49b4-a128-9988df73f571",
+          "title": "Andromeda Sadiradra - Audio Rater - Generalist - English (United State)",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["evaluation"],
+          "location": "United States",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:53:52.057Z"
+        },
+        {
+          "id": "welo:a359138d-45e6-4e40-8818-9ea8c05c516f",
+          "title": "Andromeda Sadiradra - Audio Rater - Generalist - English (United Kingdom)",
+          "company": "Welo Global",
+          "score": 65,
+          "label": "medium",
+          "match": ["evaluation"],
+          "location": "United Kingdom",
+          "korea": "unknown",
+          "source": "Welo Global · Lever",
+          "postedAt": "2026-09-25T10:45:03.048Z"
+        }
+      ],
+      "sources": [
+        {
+          "source": "Welo Global · Lever",
+          "count": 63,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:16:04.546Z"
+        },
+        {
+          "source": "Coupang · Greenhouse",
+          "count": 52,
+          "cached": false,
+          "error": null,
+          "checkedAt": "2026-09-26T13:16:00.180Z"
+        },
+        {
+          "source": "Mercor · Ashby",
+          "count": 1,
+          "cached": true,
+          "error": null,
+          "checkedAt": "2026-09-26T13:11:29.995Z"
+        }
+      ],
+      "screenshot": "screenshots/P07.png"
+    }
+  ]
+}
